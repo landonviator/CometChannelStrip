@@ -21,11 +21,14 @@ namespace viator::dsp
                 drive.reset(spec.sampleRate, 0.02);
             }
 
-            for (auto &filter: m_dc_filters)
+            for (int i = 0; i < m_negative_dc_filters.size(); ++i)
             {
-                filter.prepare(spec);
-                filter.setType(juce::dsp::LinkwitzRileyFilterType::highpass);
-                filter.setCutoffFrequency(20.0f);
+                m_positive_dc_filters[i].prepare(spec);
+                m_positive_dc_filters[i].setType(juce::dsp::LinkwitzRileyFilterType::highpass);
+                m_positive_dc_filters[i].setCutoffFrequency(5.0f);
+                m_negative_dc_filters[i].prepare(spec);
+                m_negative_dc_filters[i].setType(juce::dsp::LinkwitzRileyFilterType::highpass);
+                m_negative_dc_filters[i].setCutoffFrequency(5.0f);
             }
         }
 
@@ -38,7 +41,7 @@ namespace viator::dsp
                 {
                     const float xn = data[sample];
                     const float k = m_drive_smoothers[channel].getNextValue();
-                    const float yn = getPoletti(xn, k, channel);
+                    const float yn = processPoletti(xn, k, channel);
                     data[sample] = yn;
                 }
             }
@@ -52,49 +55,37 @@ namespace viator::dsp
             }
         }
 
+        inline float processWaveshaper(const float xn, const float k, const float lp, const float ln)
+        {
+            const float numerator = k * xn;
+
+            const float x_positive = numerator / (1.0f + numerator / lp);
+            const float x_negative = numerator / (1.0f - numerator / ln);
+
+            const auto mask = static_cast<float>(xn >= 0.0f);
+
+            return x_negative + (x_positive - x_negative) * mask;
+        }
+
+        inline float processPoletti(const float xn, const float k, const int channel)
+        {
+            const float mix = juce::jmap(k, 1.0f, 3.1f, 0.0f, 1.0f);
+            float xn_positive = processWaveshaper(xn, k, 6.6f, 0.6f);
+            float xn_negative = processWaveshaper(xn, k, 0.6f, 6.6f);
+
+            xn_positive = m_positive_dc_filters[channel].processSample(channel, xn_positive);
+            xn_negative = m_negative_dc_filters[channel].processSample(channel, xn_negative);
+
+            xn_positive = processWaveshaper(xn_positive, k, 1.6f, 1.6f);
+            xn_negative = processWaveshaper(xn_negative, k, 1.6f, 1.6f);
+
+            const float yn = xn_positive + xn_negative;
+            return (1.0f - mix) * xn + yn * mix;
+        }
+
     private:
         std::array<juce::SmoothedValue<float>, 2> m_drive_smoothers;
 
-        std::array<juce::dsp::LinkwitzRileyFilter<float>, 2> m_dc_filters;
-
-        static inline float getWaveShaped(const float xn, const float k, const float ln, const float lp)
-        {
-            const float ax = std::fabs(xn);
-            float yn_positive = 0.5f * (ax + xn);
-            float yn_negative = 0.5f * (xn - ax);
-
-            const float numerator_positive = yn_positive * k;
-            const float numerator_negative = yn_negative * k;
-
-            float denominator_positive = 1.0f + yn_positive * k / lp;
-            float denominator_negative = 1.0f - yn_negative * k / ln;
-
-            yn_positive = numerator_positive / denominator_positive;
-            yn_negative = numerator_negative / denominator_negative;
-
-            return yn_positive + yn_negative;
-        }
-
-        inline float getPoletti(const float xn, const float k, const int channel)
-        {
-            const float ax = std::fabs(xn);
-            float yn_positive = 0.5f * (ax + xn);
-            float yn_negative = 0.5f * (xn - ax);
-            float mix = juce::jlimit(0.0f, 10.0f, k) * 0.1f;
-
-            const float gain = 10.0f;
-            yn_positive = getWaveShaped(yn_positive, gain, 0.6f, 6.6f);
-            yn_negative = getWaveShaped(yn_negative, gain, 6.6f, 0.6f);
-
-            yn_positive = m_dc_filters[channel].processSample(channel, yn_positive);
-            yn_negative = m_dc_filters[channel].processSample(channel, yn_negative);
-
-            const float symmetrical = 1.6f;
-            yn_positive = getWaveShaped(yn_positive, gain, symmetrical, symmetrical);
-            yn_negative = getWaveShaped(yn_negative, gain, symmetrical, symmetrical);
-
-            const float yn = yn_positive + yn_negative;
-            return (1.0f - mix) * xn + yn * mix;
-        }
+        std::array<juce::dsp::LinkwitzRileyFilter<float>, 2> m_positive_dc_filters, m_negative_dc_filters;
     };
 }
