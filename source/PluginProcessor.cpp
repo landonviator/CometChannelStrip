@@ -95,6 +95,38 @@ juce::AudioProcessorValueTreeState::ParameterLayout AudioPluginAudioProcessor::c
                                                                   viator::parameters::consoleDriveName, 0.0f, 100.0f,
                                                                   0.0f));
 
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{viator::parameters::graphic1ID, 1},
+                                                                 viator::parameters::graphic1Name, -15.0f, 15.0f,
+                                                                 0.0f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{viator::parameters::graphic2ID, 1},
+                                                                 viator::parameters::graphic2Name, -15.0f, 15.0f,
+                                                                 0.0f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{viator::parameters::graphic3ID, 1},
+                                                                 viator::parameters::graphic3Name, -15.0f, 15.0f,
+                                                                 0.0f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{viator::parameters::graphic4ID, 1},
+                                                                 viator::parameters::graphic4Name, -15.0f, 15.0f,
+                                                                 0.0f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{viator::parameters::graphic5ID, 1},
+                                                                 viator::parameters::graphic5Name, -15.0f, 15.0f,
+                                                                 0.0f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{viator::parameters::graphic6ID, 1},
+                                                                 viator::parameters::graphic6Name, -15.0f, 15.0f,
+                                                                 0.0f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{viator::parameters::graphic7ID, 1},
+                                                                 viator::parameters::graphic7Name, -15.0f, 15.0f,
+                                                                 0.0f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{viator::parameters::graphic8ID, 1},
+                                                                 viator::parameters::graphic8Name, -15.0f, 15.0f,
+                                                                 0.0f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{viator::parameters::graphic9ID, 1},
+                                                                 viator::parameters::graphic9Name, -15.0f, 15.0f,
+                                                                 0.0f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{viator::parameters::graphic10ID, 1},
+                                                                 viator::parameters::graphic10Name, -15.0f, 15.0f,
+                                                                 0.0f));
+
+
     return {params.begin(), params.end()};
 }
 
