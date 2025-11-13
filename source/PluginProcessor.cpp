@@ -92,7 +92,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout AudioPluginAudioProcessor::c
     params.push_back(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{viator::parameters::oversamplingChoiceID, 1},
                                                                   viator::parameters::oversamplingChoiceName, items, 0));
     params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{viator::parameters::consoleDriveID, 1},
-                                                                  viator::parameters::consoleDriveName, 0.0f, 10.0f, 0.0f));
+                                                                  viator::parameters::consoleDriveName, 0.0f, 100.0f,
+                                                                  0.0f));
 
     return {params.begin(), params.end()};
 }

@@ -31,6 +31,13 @@ I recommend using the [CLion](https://www.jetbrains.com/clion) IDE from JetBrain
 perfectly with CMake, is free for non-commercial use, and cross-platform for Mac, Windows, and
 Linux. Installing CLion should also install CMake, but it would be a good idea to install CMake explicitly before.
 
+Release Build Commands:
+
+```
+cmake -B Build -D CMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64
+cmake --build Build --config Release
+```
+
 ### Install CMake
 
 Mac: Download CMake [here](https://cmake.org/download/) and install.
@@ -48,4 +55,5 @@ you should be ready to build the project, either with the build button (hammer i
 go adding your own stuff or submitting contributions!
 
 ### Issues
-If you have any issues, feel free to post questions in the [Discord](https://discord.gg/Rv5MEWgwwQ) 
+
+If you have any issues, feel free to post questions in the [Discord](https://discord.gg/Rv5MEWgwwQ)

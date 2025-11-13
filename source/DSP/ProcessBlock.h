@@ -4,8 +4,9 @@
 
 #pragma once
 #include <juce_dsp/juce_dsp.h>
-#include "Modules/ConsoleModule.h"
-#include "Modules/MasterBus.h"
+#include "DSP/Units/ConsoleModule.h"
+#include "DSP/Units/MasterBus.h"
+#include "DSP/Modules/Tube.h"
 
 namespace viator::dsp
 {
@@ -30,6 +31,7 @@ namespace viator::dsp
 
             m_console_module.prepare(spec);
             m_master_bus.prepare(spec);
+            m_tube.prepare(spec);
         }
 
         void process(juce::AudioBuffer<float>& buffer, const int num_samples)
@@ -37,8 +39,7 @@ namespace viator::dsp
             const int num_oversampled_samples = num_samples * static_cast<int>(m_oversampler->getOversamplingFactor());
             juce::dsp::AudioBlock<float> block (buffer);
             auto up_sampled_block = m_oversampler->processSamplesUp(block);
-            //m_console_module.processBlock(up_sampled_block, num_oversampled_samples);
-            m_master_bus.processBlock(up_sampled_block, num_oversampled_samples);
+            m_tube.processBlock(up_sampled_block, num_oversampled_samples);
             m_oversampler->processSamplesDown(block);
         }
 
@@ -46,6 +47,7 @@ namespace viator::dsp
         {
             m_console_module.setDrive(parameters.consoleDriveParam->get() * 0.1f);
             m_master_bus.setDrive(parameters.consoleDriveParam->get());
+            m_tube.setDrive(parameters.consoleDriveParam->get());
         }
 
     private:
@@ -53,5 +55,6 @@ namespace viator::dsp
 
         viator::dsp::ConsoleModule<float> m_console_module;
         viator::dsp::MasterBus<float> m_master_bus;
+        viator::dsp::Tube<float> m_tube;
     };
 }
