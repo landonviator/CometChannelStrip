@@ -210,19 +210,19 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     juce::ScopedNoDenormals noDenormals;
 
-//    const auto oversampling_choice = m_parameters->oversamplingParam->getIndex();
-//    if (oversampling_choice >= 0 && static_cast<size_t>(oversampling_choice) < m_process_blocks.size())
-//    {
-//        m_process_blocks[static_cast<size_t>(oversampling_choice)].process(buffer, buffer.getNumSamples());
-//    }
-
-    for (const auto& processor : m_processors)
+    const auto oversampling_choice = m_parameters->oversamplingParam->getIndex();
+    if (oversampling_choice >= 0 && static_cast<size_t>(oversampling_choice) < m_process_blocks.size())
     {
-        if (processor)
-        {
-            processor->processBlock(buffer, midiMessages);
-        }
+        m_process_blocks[static_cast<size_t>(oversampling_choice)].process(buffer, buffer.getNumSamples());
     }
+
+//    for (const auto& processor : m_processors)
+//    {
+//        if (processor)
+//        {
+//            processor->processBlock(buffer, midiMessages);
+//        }
+//    }
 }
 
 void AudioPluginAudioProcessor::addProcessor(viator::dsp::processors::ProcessorType type)
@@ -282,8 +282,8 @@ bool AudioPluginAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* AudioPluginAudioProcessor::createEditor()
 {
-    return new AudioPluginAudioProcessorEditor (*this);
-    //return new juce::GenericAudioProcessorEditor (*this);
+    //return new AudioPluginAudioProcessorEditor (*this);
+    return new juce::GenericAudioProcessorEditor (*this);
 }
 
 //==============================================================================

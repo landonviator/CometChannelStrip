@@ -65,15 +65,13 @@ namespace viator::dsp
                     float xn = data[sample];
                     const float drive = m_drive_smoothers[channel].getNextValue();
                     const float drive_comp = m_drive_comp_smoothers[channel].getNextValue();
-                    float mix = m_mix_smoothers[channel].getNextValue();
-                    mix = juce::jmap(mix, 0.0f, 1.0f, 0.05f, 1.0f);
                     float yn = xn * drive;
                     yn = processConduction(yn, 1.5f);
-                    yn = processTube(yn, 2.0f, 1.5f, 1.0f, 4.0f, -1.5f);
+                    yn = processTube(yn, 1.0f, 1.5f, 1.0f, 4.0f, -1.5f);
                     yn = m_dc_filters[channel].processSample(static_cast<int>(channel), yn);
-                    yn *= drive_comp;
-                    float xn_mix = (1.0f - mix) * xn + yn * mix;
-                    data[sample] = m_miller_cap_filter[channel].processSample(static_cast<int>(channel), xn_mix);
+                    yn = m_miller_cap_filter[channel].processSample(static_cast<int>(channel), yn);
+                    yn *= 0.8f * drive_comp;
+                    data[sample] = yn;
                 }
             }
         }
@@ -84,7 +82,7 @@ namespace viator::dsp
 
             float clip_delta = xn - thresh;
             clip_delta = std::fmax(clip_delta, 0.0f);
-            const float compressionFactor = compression_term * std::exp(-0.3241584f * clip_delta);
+            const float compressionFactor = 0.447f + 0.545f * std::exp(-0.3241584f * clip_delta);
 
             return (1.0f - mask) * xn + compressionFactor * xn * mask;
         }
@@ -104,12 +102,10 @@ namespace viator::dsp
                 {
                     xn -= thresh;
 
-//                    if (clip_pos > 1.0f)
-//                    {
-//                        xn /= (clip_pos - thresh);
-//                    }
-
-                    xn /= (clip_pos - thresh);
+                    if (clip_pos > 1.0f)
+                    {
+                        xn /= (clip_pos - thresh);
+                    }
 
                     yn = xn * (3.0f / 2.0f) * (1.0f - (xn * xn) / 3.0f);
                     yn *= (clip_pos - thresh);
@@ -147,7 +143,9 @@ namespace viator::dsp
 
             for (auto &drive: m_drive_comp_smoothers)
             {
-                drive.setTargetValue(juce::Decibels::decibelsToGain(value * -0.15f));
+                const auto raw_comp = value * -0.3f;
+                const auto comp_scaled = juce::jlimit(-15.0f, 0.0f, raw_comp);
+                drive.setTargetValue(juce::Decibels::decibelsToGain(comp_scaled));
             }
 
             for (auto &drive: m_mix_smoothers)
@@ -159,8 +157,6 @@ namespace viator::dsp
     private:
         std::array<juce::SmoothedValue<float>, 2> m_drive_smoothers, m_drive_comp_smoothers, m_mix_smoothers;
         std::array<juce::dsp::LinkwitzRileyFilter<float>, 2> m_dc_filters, m_miller_cap_filter;
-
-        static constexpr float compression_term = 0.4473253f + 0.5451584f;
     };
 }
 
