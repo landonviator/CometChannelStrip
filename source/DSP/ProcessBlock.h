@@ -41,7 +41,7 @@ namespace viator::dsp
             const int num_oversampled_samples = num_samples * static_cast<int>(m_oversampler->getOversamplingFactor());
             juce::dsp::AudioBlock<float> block (buffer);
             auto up_sampled_block = m_oversampler->processSamplesUp(block);
-            m_graphic_eq.processBlock(up_sampled_block, num_oversampled_samples);
+            m_tube.processBlock(up_sampled_block, num_oversampled_samples);
             m_oversampler->processSamplesDown(block);
         }
 

@@ -13,6 +13,8 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
                        ), m_tree_state(*this, nullptr, "PARAMETERS", createParameterLayout())
 {
     m_parameters = std::make_unique<viator::parameters::parameters>(m_tree_state);
+
+    m_processors.clear();
 }
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
@@ -155,6 +157,14 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     {
         m_process_blocks[i].prepare(sampleRate, samplesPerBlock, getTotalNumInputChannels(), i);
     }
+
+    for (const auto& processor : m_processors)
+    {
+        if (processor)
+        {
+            processor->prepareToPlay(sampleRate, samplesPerBlock);
+        }
+    }
 }
 
 void AudioPluginAudioProcessor::releaseResources()
@@ -190,17 +200,78 @@ bool AudioPluginAudioProcessor::isBusesLayoutSupported (const BusesLayout& layou
 void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
                                               juce::MidiBuffer& midiMessages)
 {
+    const juce::ScopedTryLock tryLock(m_processor_lock);
+    if (!tryLock.isLocked())
+        return;
+
     juce::ignoreUnused (midiMessages);
 
     updateParameters();
 
     juce::ScopedNoDenormals noDenormals;
 
-    const auto oversampling_choice = m_parameters->oversamplingParam->getIndex();
-    if (oversampling_choice >= 0 && static_cast<size_t>(oversampling_choice) < m_process_blocks.size())
+//    const auto oversampling_choice = m_parameters->oversamplingParam->getIndex();
+//    if (oversampling_choice >= 0 && static_cast<size_t>(oversampling_choice) < m_process_blocks.size())
+//    {
+//        m_process_blocks[static_cast<size_t>(oversampling_choice)].process(buffer, buffer.getNumSamples());
+//    }
+
+    for (const auto& processor : m_processors)
     {
-        m_process_blocks[static_cast<size_t>(oversampling_choice)].process(buffer, buffer.getNumSamples());
+        if (processor)
+        {
+            processor->processBlock(buffer, midiMessages);
+        }
     }
+}
+
+void AudioPluginAudioProcessor::addProcessor(viator::dsp::processors::ProcessorType type)
+{
+    const juce::ScopedLock lock (m_processor_lock);
+
+    const int index = static_cast<int>(m_processors.size());
+    auto processor = viator::dsp::processors::createProcessorByType(type, index);
+
+    if (processor)
+    {
+        processor->prepareToPlay(getSampleRate(), getBlockSize());
+        m_processors.emplace_back(std::move(processor));
+    } else
+    {
+        jassertfalse;
+    }
+}
+
+void AudioPluginAudioProcessor::swapProcessors(const int a, const int b)
+{
+    const juce::ScopedLock lock (m_processor_lock);
+
+    if (m_processors[a] && m_processors[b])
+    {
+        std::swap(m_processors[a], m_processors[b]);
+    }
+}
+
+void AudioPluginAudioProcessor::removeProcessor(const int index)
+{
+    const juce::ScopedLock lock (m_processor_lock);
+
+    if (m_processors[index])
+    {
+        m_processors.erase(m_processors.begin() + index);
+    }
+}
+
+viator::dsp::processors::BaseProcessor* AudioPluginAudioProcessor::getProcessor(int index)
+{
+    const juce::ScopedLock lock (m_processor_lock);
+
+    if (m_processors[index])
+    {
+        return m_processors[index].get();
+    }
+
+    jassertfalse;
 }
 
 //==============================================================================
@@ -211,8 +282,8 @@ bool AudioPluginAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* AudioPluginAudioProcessor::createEditor()
 {
-    //return new AudioPluginAudioProcessorEditor (*this);
-    return new juce::GenericAudioProcessorEditor (*this);
+    return new AudioPluginAudioProcessorEditor (*this);
+    //return new juce::GenericAudioProcessorEditor (*this);
 }
 
 //==============================================================================

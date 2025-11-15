@@ -4,6 +4,8 @@
 #include "Globals/Parameters.h"
 #include "Globals/Globals.h"
 #include "DSP/ProcessBlock.h"
+#include "DSP/Processors/BaseProcessor.h"
+#include "DSP/Processors/ProcessorUtils.h"
 //==============================================================================
 class AudioPluginAudioProcessor final : public juce::AudioProcessor, public juce::AudioProcessorValueTreeState::Listener
 {
@@ -45,6 +47,12 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     juce::AudioProcessorValueTreeState& getTreeState() { return m_tree_state; }
+
+    void addProcessor(viator::dsp::processors::ProcessorType type);
+    void swapProcessors(const int a, const int b);
+    void removeProcessor(const int index);
+    viator::dsp::processors::BaseProcessor* getProcessor(int index);
+
 private:
 
     juce::AudioProcessorValueTreeState m_tree_state;
@@ -56,6 +64,10 @@ private:
     std::unique_ptr<viator::parameters::parameters> m_parameters;
 
     std::array<viator::dsp::ProcessBlock, 5> m_process_blocks;
+
+    std::vector<std::unique_ptr<viator::dsp::processors::BaseProcessor>> m_processors;
+
+    juce::CriticalSection m_processor_lock;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessor)
 };

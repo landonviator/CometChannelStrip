@@ -23,7 +23,10 @@ AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
 //==============================================================================
 void AudioPluginAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    g.fillAll (juce::Colour(34, 40, 49));
+    g.fillAll (juce::Colour(41, 42, 43));
+
+    g.setColour(juce::Colour(27, 28, 29));
+    g.fillRect(0, 0, getWidth(), getHeight() / 10);
 }
 
 void AudioPluginAudioProcessorEditor::resized()
