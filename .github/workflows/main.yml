@@ -9,8 +9,8 @@ jobs:
   build-mac:
     runs-on: macos-latest
 
-  steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
-      with:
-        submodules: recursive
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
