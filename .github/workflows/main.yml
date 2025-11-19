@@ -15,3 +15,38 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Install dependencies
+        run: |
+          brew install cmake gtk+3
+
+      - name: Set Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_15.1.app
+
+      - name: Clear CMake build directories
+        run: |
+          if [ -d Build ]; then
+            rm -rf Build
+          fi
+
+      - name: Configure CMake
+        run: cmake -B Build -D CMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+
+      - name: Build
+        run: cmake --build Build --config Release
+
+      - name: Create Installer Mac AU
+        run: |
+          pkgbuild --root Build/CometChannelStrip_artefacts/Release/AU \
+          --identifier com.ViatorDSP.CometChannelStrip \
+          --install-location Library/Audio/Plug-Ins/Components \
+          --version "1.0.0" \
+          CometChannelStrip-au.pkg
+
+      - name: Create Installer Mac VST3
+        run: |
+          pkgbuild --root Build/CometChannelStrip_artefacts/Release/VST3 \
+          --identifier com.ViatorDSP.CometChannelStrip \
+          --install-location Library/Audio/Plug-Ins/VST3 \
+          --version "1.0.0" \
+          CometChannelStrip-VST3.pkg
+
