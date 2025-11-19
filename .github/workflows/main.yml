@@ -50,3 +50,15 @@ jobs:
           --version "1.0.0" \
           CometChannelStrip-VST3.pkg
 
+      - name: Upload AU Installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: ViatorDSP-Mac-Installer-AU
+          path: CometChannelStrip-au.pkg
+
+      - name: Upload VST3 Installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: ViatorDSP-Mac-Installer-VST3
+          path: CometChannelStrip-vst3.pkg
+
