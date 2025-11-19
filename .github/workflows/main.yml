@@ -64,3 +64,50 @@ jobs:
         with:
           name: ${{ env.project_name }}-Mac-Installer-VST3
           path: ${{ env.project_name }}-VST3.pkg
+
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Setup Visual Studio
+        uses: microsoft/setup-msbuild@v1.1
+        with:
+          msbuild-architecture: 'x64'
+
+      - name: Install Windows SDK
+        run: |
+          choco install windows-sdk-10.1
+
+      - name: Install dependencies
+        run: |
+          choco install cmake
+
+      - name: Clear CMake build directories
+        run: |
+          if (Test-Path Build) {
+            Remove-Item Build -Recurse -Force
+          }
+
+      - name: Configure CMake
+        run: |
+          cmake -B Build -D CMAKE_BUILD_TYPE=Release -D CMAKE_GENERATOR_PLATFORM=x64
+
+      - name: Build
+        run: |
+          cmake --build Build --config Release
+
+      - name: Zip the folder
+        run: |
+          Compress-Archive -Path "Build\${{ env.project_name }}_artefacts\Release\VST3\${{ env.project_name }}.vst3" -DestinationPath "${{ env.project_name }}.zip"
+        shell: pwsh
+
+      - name: Upload Installer Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.project_name }}-Windows-Installer-VST3
+          path: Build\${{ env.project_name }}_artefacts\Release\VST3\
