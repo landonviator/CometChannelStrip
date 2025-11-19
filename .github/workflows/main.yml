@@ -20,7 +20,9 @@ jobs:
           brew install cmake gtk+3
 
       - name: Set Xcode version
-        run: sudo xcode-select -s /Applications/Xcode_15.1.app
+        uses: maxim-lobanov/setup-xcode@vX
+        with:
+          xcode-version: '15.1'
 
       - name: Clear CMake build directories
         run: |
