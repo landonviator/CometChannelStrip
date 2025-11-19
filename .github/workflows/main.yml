@@ -1,5 +1,8 @@
 name: Build JUCE Plugin
 
+env:
+  project_name: CometChannelStrip
+
 on:
   push:
     branches:
@@ -36,29 +39,28 @@ jobs:
 
       - name: Create Installer Mac AU
         run: |
-          pkgbuild --root Build/CometChannelStrip_artefacts/Release/AU \
-          --identifier com.ViatorDSP.CometChannelStrip \
+          pkgbuild --root Build/${{ env.project_name }}_artefacts/Release/AU \
+          --identifier com.ViatorDSP.${{ env.project_name }} \
           --install-location Library/Audio/Plug-Ins/Components \
           --version "1.0.0" \
-          CometChannelStrip-au.pkg
+          ${{ env.project_name }}-AU.pkg
 
       - name: Create Installer Mac VST3
         run: |
-          pkgbuild --root Build/CometChannelStrip_artefacts/Release/VST3 \
-          --identifier com.ViatorDSP.CometChannelStrip \
+          pkgbuild --root Build/${{ env.project_name }}_artefacts/Release/VST3 \
+          --identifier com.ViatorDSP.${{ env.project_name }} \
           --install-location Library/Audio/Plug-Ins/VST3 \
           --version "1.0.0" \
-          CometChannelStrip-VST3.pkg
+          ${{ env.project_name }}-VST3.pkg
 
       - name: Upload AU Installer
         uses: actions/upload-artifact@v4
         with:
-          name: ViatorDSP-Mac-Installer-AU
-          path: CometChannelStrip-au.pkg
+          name: ${{ env.project_name }}-Mac-Installer-AU
+          path: ${{ env.project_name }}-AU.pkg
 
       - name: Upload VST3 Installer
         uses: actions/upload-artifact@v4
         with:
-          name: ViatorDSP-Mac-Installer-VST3
-          path: CometChannelStrip-vst3.pkg
-
+          name: ${{ env.project_name }}-Mac-Installer-VST3
+          path: ${{ env.project_name }}-VST3.pkg
