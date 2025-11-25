@@ -8,7 +8,9 @@
 #include "DSP/Processors/ProcessorUtils.h"
 #include "Engine/MacroMap.h"
 //==============================================================================
-class AudioPluginAudioProcessor final : public juce::AudioProcessor, public juce::AudioProcessorValueTreeState::Listener
+class AudioPluginAudioProcessor final : public juce::AudioProcessor,
+        public juce::AudioProcessorValueTreeState::Listener,
+public juce::ActionBroadcaster
 {
 public:
     //==============================================================================

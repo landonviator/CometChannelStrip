@@ -30,7 +30,7 @@ namespace viator::dsp::processors
         static const std::vector<ProcessorDefinition> registry = {
                 {
                         ProcessorType::kClipper,
-                        "Reduction",
+                        "Clipper",
                         "Test",
                         [](int id)
                         {
@@ -44,7 +44,7 @@ namespace viator::dsp::processors
                 },
                 {
                         ProcessorType::k50A,
-                        "Amplification",
+                        "50A",
                         "Test",
                         [](int id)
                         {

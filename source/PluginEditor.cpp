@@ -2,28 +2,31 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (AudioPluginAudioProcessor& p)
-    : AudioProcessorEditor (&p), processorRef (p), m_rack(processorRef)
+AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudioProcessor &p)
+        : AudioProcessorEditor(&p), processorRef(p), m_rack(processorRef)
 {
-    juce::ignoreUnused (processorRef);
+    juce::ignoreUnused(processorRef);
 
     const auto items = viator::globals::Oversampling::items;
     setComboBoxProps(m_oversampling_menu, items);
-    m_oversampling_Attach = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(processorRef.getTreeState(),
-                                                                                                     viator::parameters::oversamplingChoiceID,
-                                                                                                     m_oversampling_menu);
+    m_oversampling_Attach = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(
+            processorRef.getTreeState(),
+            viator::parameters::oversamplingChoiceID,
+            m_oversampling_menu);
 
     addAndMakeVisible(m_rack);
     m_rack.addActionListener(this);
     m_rack.rebuild_editors();
     initMacroKnobs();
 
-    setSize (1500, 700);
+    refreshMacroMappings();
+
+    setSize(1500, 700);
 }
 
 AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
 {
-    for (auto& macro : m_macro_knobs)
+    for (auto &macro: m_macro_knobs)
     {
         macro.removeMouseListener(this);
     }
@@ -32,9 +35,9 @@ AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
 }
 
 //==============================================================================
-void AudioPluginAudioProcessorEditor::paint (juce::Graphics& g)
+void AudioPluginAudioProcessorEditor::paint(juce::Graphics &g)
 {
-    g.fillAll (juce::Colours::black.brighter(0.12f));
+    g.fillAll(juce::Colours::black.brighter(0.12f));
 
     g.setColour(juce::Colours::black);
     g.drawRect(0, 0, getWidth(), getHeight(), 3);
@@ -62,7 +65,7 @@ void AudioPluginAudioProcessorEditor::resized()
     y = juce::roundToInt(getHeight() * 0.9);
     width = juce::roundToInt(getWidth() * 0.05);
     height = width;
-    for (auto& knob : m_macro_knobs)
+    for (auto &knob: m_macro_knobs)
     {
         knob.setBounds(x, y, width, height);
         x += width * 2;
@@ -82,21 +85,36 @@ void AudioPluginAudioProcessorEditor::initMacroKnobs()
     {
         m_macro_knobs[i].setSliderStyle(juce::Slider::RotaryVerticalDrag);
         m_macro_knobs[i].setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-        m_macro_knobs[i].setComponentID("macro" + juce::String(i+1) + "ID");
+        m_macro_knobs[i].setComponentID("macro" + juce::String(i + 1) + "ID");
         m_macro_knobs[i].addMouseListener(this, true);
-        m_macro_attaches.emplace_back(std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processorRef
-                .getTreeState(), "macro" + juce::String(i+1) + "ID", m_macro_knobs[i]));
+        m_macro_attaches.emplace_back(
+                std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processorRef
+                                                                                               .getTreeState(),
+                                                                                       "macro" + juce::String(i + 1) +
+                                                                                       "ID", m_macro_knobs[i]));
         addAndMakeVisible(m_macro_knobs[i]);
     }
 }
 
 void AudioPluginAudioProcessorEditor::changeListenerCallback(juce::ChangeBroadcaster *source)
 {
-    if (auto slider = dynamic_cast<viator::gui::widgets::BaseSlider*>(source))
+    if (auto slider = dynamic_cast<viator::gui::widgets::BaseSlider *>(source))
     {
         const auto slider_id_to_map = slider->getComponentID();
-        DBG(slider->getComponentID());
-        processorRef.getMacroMap().addMacroAssignment(slider_id_to_map);
+        const auto is_mapped = slider->getIsMapped();
+
+        if (is_mapped)
+        {
+            processorRef.getMacroMap().removeMacroAssignment(slider_id_to_map);
+        } else
+        {
+            processorRef.getMacroMap().addMacroAssignment(slider_id_to_map);
+            slider->getProperties().set(viator::globals::WidgetProperties::macroKey, processorRef.getMacroMap()
+                    .getCurrentMacro());
+        }
+
+        slider->setIsMapped(!is_mapped);
+        slider->showMapping(!is_mapped);
     }
 }
 
@@ -104,11 +122,11 @@ void AudioPluginAudioProcessorEditor::actionListenerCallback(const juce::String 
 {
     if (message == viator::globals::ActionCommands::editorAdded)
     {
-        for (auto& editor : m_rack.getEditors())
+        for (auto &editor: m_rack.getEditors())
         {
-            if (auto* base_editor = dynamic_cast<viator::gui::editors::BaseEditor*>(editor.get()))
+            if (auto *base_editor = dynamic_cast<viator::gui::editors::BaseEditor *>(editor.get()))
             {
-                for (auto& slider : base_editor->getSliders())
+                for (auto &slider: base_editor->getSliders())
                 {
                     slider->removeChangeListener(this);
                     slider->addChangeListener(this);
@@ -122,9 +140,9 @@ void AudioPluginAudioProcessorEditor::mouseDown(const juce::MouseEvent &event)
 {
     if (event.mods.isRightButtonDown())
     {
-        if (auto* macro_slider = dynamic_cast<viator::gui::widgets::MacroSlider*>(event.eventComponent))
+        if (auto *macro_slider = dynamic_cast<viator::gui::widgets::MacroSlider *>(event.eventComponent))
         {
-            for (auto& macro : m_macro_knobs)
+            for (auto &macro: m_macro_knobs)
             {
                 if (&macro != macro_slider)
                     macro.enableMacroState(false);
@@ -135,6 +153,48 @@ void AudioPluginAudioProcessorEditor::mouseDown(const juce::MouseEvent &event)
             const auto macro_state = macro_slider->getMacroState();
             processorRef.getMacroMap().setMacroLearnState(macro_state);
             processorRef.getMacroMap().macroStateChanged(selected_macro);
+
+            for (auto &editor: m_rack.getEditors())
+            {
+                if (auto *base_editor = dynamic_cast<viator::gui::editors::BaseEditor *>(editor.get()))
+                {
+                    for (auto &slider: base_editor->getSliders())
+                    {
+                        const auto state = static_cast<bool>(static_cast<int>(macro_state));
+                        const auto is_macro = selected_macro == slider->getProperties().getWithDefault(
+                                viator::globals::WidgetProperties::macroKey, "");
+                        slider->showMapping(state && is_macro);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void AudioPluginAudioProcessorEditor::refreshMacroMappings()
+{
+    for (auto& editor : m_rack.getEditors())
+    {
+        if (auto* base_editor = dynamic_cast<viator::gui::editors::BaseEditor*>(editor.get()))
+        {
+            for (auto* slider : base_editor->getSliders())
+            {
+                const auto sliderID = slider->getComponentID();
+                const auto macroID  = processorRef.getMacroMap().getMacroForSlider(sliderID);
+                const bool mapped   = macroID.isNotEmpty();
+
+                // restore component property (GUI-only)
+                if (mapped)
+                    slider->getProperties().set(viator::globals::WidgetProperties::macroKey, macroID);
+                else
+                    slider->getProperties().remove(viator::globals::WidgetProperties::macroKey);
+
+                // restore internal slider state
+                slider->setIsMapped(mapped);
+
+                // default hide until a macro knob is active
+                slider->showMapping(false);
+            }
         }
     }
 }

@@ -45,5 +45,7 @@ private:
 
     viator::gui::widgets::MacroSlider *m_macro_slider{nullptr};
 
+    void refreshMacroMappings();
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessorEditor)
 };

@@ -21,5 +21,11 @@ namespace viator::globals
     {
         static inline const juce::String macroToggled { "macroToggled" };
         static inline const juce::String editorAdded { "editorAdded" };
+        static inline const juce::String modulesLoaded { "Loaded" };
+    };
+
+    struct WidgetProperties
+    {
+        static inline const juce::String macroKey { "macroKey" };
     };
 }

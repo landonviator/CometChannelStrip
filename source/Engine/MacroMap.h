@@ -36,7 +36,6 @@ namespace viator::engine
                 return;
 
             m_macro_map[m_current_macro_key].insert(paramID);
-            DBG("Adding " << m_current_macro_key << " to " << paramID);
         }
 
         void removeMacroAssignment(const juce::String& paramID)
@@ -62,10 +61,7 @@ namespace viator::engine
 
         void macroStateChanged(const juce::String& macro_id)
         {
-            m_current_macro_key = {};
-
             m_current_macro_key = macro_id;
-            DBG("Macro Clicked: " << m_current_macro_key);
         }
 
         [[nodiscard]] std::unordered_set<juce::String> getAssignmentsForCurrentMacro() const
@@ -119,6 +115,22 @@ namespace viator::engine
                     m_macro_map[macroID] = std::move(paramIDs);
                 }
             }
+        }
+
+        juce::String& getCurrentMacro() { return m_current_macro_key; }
+
+        juce::String getMacroForSlider(const juce::String& sliderID) const
+        {
+            for (const auto& entry : m_macro_map)
+            {
+                const auto& macroID  = entry.first;
+                const auto& sliders  = entry.second; // unordered_set<String>
+
+                if (sliders.find(sliderID) != sliders.end())
+                    return macroID; // found
+            }
+
+            return {}; // not mapped
         }
 
     private:

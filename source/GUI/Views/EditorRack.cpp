@@ -14,6 +14,7 @@ namespace viator::gui::views
 
     EditorRack::~EditorRack()
     {
+        processorRef.removeActionListener(this);
     }
 
     void EditorRack::paint(juce::Graphics &g)
@@ -38,11 +39,6 @@ namespace viator::gui::views
     void EditorRack::addEditor(viator::dsp::processors::ProcessorType type)
     {
         processorRef.addProcessor(type);
-
-        while (processorRef.m_adding_processor.load())
-        {
-
-        }
 
         const int index = processorRef.getProcessors().size() - 1;
 
@@ -146,5 +142,13 @@ namespace viator::gui::views
         dragging_editor = nullptr;
         drag_original_index = -1;
         resized();
+    }
+
+    void EditorRack::actionListenerCallback(const juce::String &message)
+    {
+        if (message == viator::globals::ActionCommands::modulesLoaded)
+        {
+            rebuild_editors();
+        }
     }
 }

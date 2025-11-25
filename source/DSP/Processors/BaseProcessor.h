@@ -24,6 +24,19 @@ class BaseProcessor : public juce::AudioProcessor
     int getProcessorID() { return m_processor_id; }
 
     void setProcessorID(const int id) { m_processor_id = id; }
+
+    void getStateInformation(juce::MemoryBlock &destData) override
+    {
+        juce::MemoryOutputStream stream(destData, false);
+        getTreeState().state.writeToStream(stream);
+    }
+
+    void setStateInformation(const void *data, int sizeInBytes) override
+    {
+        if (auto state = juce::ValueTree::readFromData(data, static_cast<size_t>(sizeInBytes)); state.isValid()) {
+            getTreeState().state = state;
+        }
+    }
 private:
 
     std::unique_ptr<juce::AudioProcessorValueTreeState> m_tree_state;

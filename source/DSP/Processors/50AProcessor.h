@@ -44,10 +44,6 @@ class AmplificationProcessor : public viator::dsp::processors::BaseProcessor
         const juce::String getProgramName (int index) override;
         void changeProgramName (int index, const juce::String& newName) override;
 
-        //==============================================================================
-        void getStateInformation (juce::MemoryBlock& destData) override;
-        void setStateInformation (const void* data, int sizeInBytes) override;
-
     private:
 
         std::array<juce::dsp::LinkwitzRileyFilter<float>, 2> m_lp_filter;

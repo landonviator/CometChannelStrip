@@ -12,7 +12,7 @@ class AudioPluginAudioProcessor;
 
 namespace viator::gui::views
 {
-class EditorRack : public juce::Component, public juce::ActionBroadcaster
+class EditorRack : public juce::Component, public juce::ActionBroadcaster, public juce::ActionListener
     {
     public:
         EditorRack(AudioPluginAudioProcessor &);
@@ -37,5 +37,7 @@ class EditorRack : public juce::Component, public juce::ActionBroadcaster
         juce::AudioProcessorEditor* dragging_editor = nullptr;
         juce::Point<int> drag_offset_from_top_left;
         int drag_original_index = -1;
+
+    void actionListenerCallback(const juce::String &message) override;
     };
 }

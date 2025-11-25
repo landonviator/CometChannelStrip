@@ -303,17 +303,122 @@ juce::AudioProcessorEditor* AudioPluginAudioProcessor::createEditor()
 //==============================================================================
 void AudioPluginAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
-    juce::ignoreUnused (destData);
+    DBG("📦 Starting getStateInformation()");
+
+    juce::ValueTree parentTree("PluginState");
+
+    DBG("📦 Processors to save: " << m_processors.size());
+
+    for (int i = 0; i < m_processors.size(); ++i)
+    {
+        auto *processor = m_processors[i].get();
+        juce::MemoryBlock subState;
+        processor->getStateInformation(subState);
+
+        if (auto processorTree = juce::ValueTree::readFromData(subState.getData(), subState.getSize()); processorTree.isValid())
+        {
+            juce::ValueTree wrapper("Processor");
+
+            const auto &registry = viator::dsp::processors::getProcessorRegistry();
+            for (const auto &def: registry)
+            {
+                const auto processor_name = processor->getName();
+                const auto name = def.name;
+                if (processor->getName() == def.name)
+                {
+                    wrapper.setProperty("type", def.name, nullptr);
+                    wrapper.setProperty("index", i, nullptr);
+                    break;
+                }
+            }
+
+            wrapper.addChild(processorTree, -1, nullptr);
+            parentTree.addChild(wrapper, -1, nullptr);
+
+            DBG("✅ Saved processor: " << processor->getName());
+        } else
+        {
+            DBG("❌ Invalid processor state tree at index: " << i);
+        }
+    }
+
+    // Store parameter state
+    auto parameterStateCopy = m_tree_state.copyState();
+    parameterStateCopy.removeChild(parameterStateCopy.getChildWithName("Macros"), nullptr);
+    parameterStateCopy.appendChild(m_macro_map.saveMacroState(), nullptr);
+
+    parentTree.addChild(parameterStateCopy, -1, nullptr);
+    DBG("✅ Parameters added to state");
+
+    DBG("💾 Saving state. parentTree type: " << parentTree.getType().toString()
+                                            << ", numChildren: " << parentTree.getNumChildren());
+    for (int i = 0; i < parentTree.getNumChildren(); ++i)
+    {
+        auto child = parentTree.getChild(i);
+        DBG("   save child[" << i << "] type = " << child.getType().toString());
+    }
+
+    // Serialize to memory
+    juce::MemoryOutputStream stream(destData, false);
+    parentTree.writeToStream(stream);
+
+    DBG("📦 Finished getStateInformation(), total size: " << destData.getSize() << " bytes");
 }
 
 void AudioPluginAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
-    juce::ignoreUnused (data, sizeInBytes);
+    auto parentTree = juce::ValueTree::readFromData(data, static_cast<size_t>(sizeInBytes));
+    if (!parentTree.isValid())
+    {
+        DBG("❌ Invalid parentTree in setStateInformation");
+        return;
+    }
+
+    DBG("🔍 parentTree type: " << parentTree.getType().toString()
+                              << ", numChildren: " << parentTree.getNumChildren());
+
+    m_processors.clear();
+
+    for (int i = 0; i < parentTree.getNumChildren(); ++i)
+    {
+        auto wrapper = parentTree.getChild(i);
+
+        if (wrapper.hasType(m_tree_state.state.getType()))
+        {
+            m_tree_state.state = wrapper;
+            continue;
+        }
+
+        if (!wrapper.hasType("Processor")) continue;
+
+        const auto typeStr = wrapper.getProperty("type").toString();
+        const int index = static_cast<int>(wrapper.getProperty("index", 0));
+
+        if (wrapper.getNumChildren() == 0)
+            continue;
+
+        auto processorTree = wrapper.getChild(0);
+        auto processorType = viator::dsp::processors::processorTypeFromString(typeStr);
+
+        auto processor = createProcessorByType(processorType, index);
+        if (processor != nullptr)
+        {
+            juce::MemoryOutputStream stream;
+            processorTree.writeToStream(stream);
+
+            processor->prepareToPlay(getSampleRate(), getBlockSize());
+            processor->setStateInformation(stream.getData(), static_cast<int>(stream.getDataSize()));
+            m_processors.push_back(std::move(processor));
+            sendActionMessage("Loaded");
+        } else
+        {
+            DBG("Failed to create processor of type: " << typeStr);
+        }
+    }
+
+    const auto macros = m_tree_state.state.getChildWithName("Macros");
+    if (macros.isValid())
+        m_macro_map.loadMacroState(macros);
 }
 
 //==============================================================================

@@ -72,11 +72,6 @@ namespace viator::dsp::processors
 
         void changeProgramName(int index, const juce::String &newName) override;
 
-        //==============================================================================
-        void getStateInformation(juce::MemoryBlock &destData) override;
-
-        void setStateInformation(const void *data, int sizeInBytes) override;
-
     private:
         juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout(int id);
         void parameterChanged(const juce::String &parameterID, float newValue) override;

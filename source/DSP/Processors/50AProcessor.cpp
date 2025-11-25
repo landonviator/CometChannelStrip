@@ -19,7 +19,7 @@ namespace viator::dsp::processors
 //==============================================================================
     const juce::String AmplificationProcessor::getName() const
     {
-        return "Amplification";
+        return "50A";
     }
 
     bool AmplificationProcessor::acceptsMidi() const
@@ -158,21 +158,5 @@ namespace viator::dsp::processors
     juce::AudioProcessorEditor *AmplificationProcessor::createEditor()
     {
         return new viator::gui::editors::AmplificationEditor (*this);
-    }
-
-//==============================================================================
-    void AmplificationProcessor::getStateInformation(juce::MemoryBlock &destData)
-    {
-        // You should use this method to store your parameters in the memory block.
-        // You could do that either as raw data, or use the XML or ValueTree classes
-        // as intermediaries to make it easy to save and load complex data.
-        juce::ignoreUnused(destData);
-    }
-
-    void AmplificationProcessor::setStateInformation(const void *data, int sizeInBytes)
-    {
-        // You should use this method to restore your parameters from this memory block,
-        // whose contents will have been created by the getStateInformation() call.
-        juce::ignoreUnused(data, sizeInBytes);
     }
 }
