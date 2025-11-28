@@ -15,8 +15,8 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
     m_parameters = std::make_unique<viator::parameters::parameters>(m_tree_state);
 
     m_processors.clear();
-    addProcessor(viator::dsp::processors::ProcessorType::kClipper);
-    addProcessor(viator::dsp::processors::ProcessorType::kClipper);
+    //addProcessor(viator::dsp::processors::ProcessorType::kClipper);
+    //addProcessor(viator::dsp::processors::ProcessorType::kClipper);
 
     for (int i = 0; i < 10; ++i)
     {
@@ -254,6 +254,8 @@ void AudioPluginAudioProcessor::addProcessor(viator::dsp::processors::ProcessorT
     {
         jassertfalse;
     }
+
+    sendActionMessage(viator::globals::ActionCommands::processorAdded);
 }
 
 void AudioPluginAudioProcessor::swapProcessors(const int a, const int b)

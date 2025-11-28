@@ -12,32 +12,43 @@ class AudioPluginAudioProcessor;
 
 namespace viator::gui::views
 {
-class EditorRack : public juce::Component, public juce::ActionBroadcaster, public juce::ActionListener
+    class EditorRack
+            : public juce::Component, public juce::ActionBroadcaster, public juce::ActionListener
     {
     public:
         EditorRack(AudioPluginAudioProcessor &);
+
         ~EditorRack() override;
 
         void paint(juce::Graphics &g) override;
+
         void resized() override;
 
         void rebuild_editors();
 
-    std::vector<std::unique_ptr<juce::AudioProcessorEditor>>& getEditors() { return m_editors; }
+        std::vector<std::unique_ptr<juce::AudioProcessorEditor>> &getEditors()
+        { return m_editors; }
+
     private:
         AudioPluginAudioProcessor &processorRef;
         std::vector<std::unique_ptr<juce::AudioProcessorEditor>> m_editors;
 
-        void addEditor(viator::dsp::processors::ProcessorType type);
+        void addEditor();
 
+        juce::ComboBox m_plugin_selector;
+        const int processorIdOffset = 1000;
+        void buildPopupMenu();
 
         void mouseDown(const juce::MouseEvent &e) override;
+
         void mouseDrag(const juce::MouseEvent &e) override;
+
         void mouseUp(const juce::MouseEvent &e) override;
-        juce::AudioProcessorEditor* dragging_editor = nullptr;
+
+        juce::AudioProcessorEditor *dragging_editor = nullptr;
         juce::Point<int> drag_offset_from_top_left;
         int drag_original_index = -1;
 
-    void actionListenerCallback(const juce::String &message) override;
+        void actionListenerCallback(const juce::String &message) override;
     };
 }
