@@ -4,7 +4,6 @@
 
 #include "EditorRack.h"
 #include "../../PluginProcessor.h"
-#include "../../PluginEditor.h"
 
 namespace viator::gui::views
 {
@@ -37,6 +36,14 @@ namespace viator::gui::views
     EditorRack::~EditorRack()
     {
         processorRef.removeActionListener(this);
+
+        for (const auto& editor : m_editors)
+        {
+            if (auto *base = dynamic_cast<viator::gui::editors::BaseEditor *>(editor.get()))
+            {
+                base->removeActionListener(this);
+            }
+        }
     }
 
     void EditorRack::paint(juce::Graphics &g)
@@ -47,9 +54,10 @@ namespace viator::gui::views
 
     void EditorRack::resized()
     {
+
         auto x = juce::roundToInt(getWidth() * 0);
         auto y = juce::roundToInt(getHeight() * 0);
-        auto width = juce::roundToInt(getWidth() * 0.25);
+        auto width = juce::roundToInt(parent_width * 0.25);
         auto height = juce::roundToInt(getHeight());
         for (const auto &m_editor: m_editors)
         {
@@ -75,6 +83,12 @@ namespace viator::gui::views
             if (editor)
             {
                 editor->addMouseListener(this, false);
+
+                if (auto *base = dynamic_cast<viator::gui::editors::BaseEditor *>(editor.get()))
+                {
+                    base->addActionListener(this);
+                }
+
                 m_editors.push_back(std::move(editor));
                 sendActionMessage(viator::globals::ActionCommands::editorAdded);
                 addAndMakeVisible(*m_editors.back());
@@ -101,6 +115,12 @@ namespace viator::gui::views
                 {
 
                     editor->addMouseListener(this, false);
+
+                    if (auto *base = dynamic_cast<viator::gui::editors::BaseEditor *>(editor.get()))
+                    {
+                        base->addActionListener(this);
+                    }
+
                     m_editors.push_back(std::move(editor));
                     sendActionMessage(viator::globals::ActionCommands::editorAdded);
                     addAndMakeVisible(*m_editors.back());
@@ -192,6 +212,22 @@ namespace viator::gui::views
         {
             addEditor();
         }
+
+        if (message.startsWith(viator::globals::ActionCommands::editorDeleted))
+        {
+            const auto hexStr = message.fromFirstOccurrenceOf(viator::globals::ActionCommands::editorDeleted, false, false);
+            const auto ptrValue = hexStr.getHexValue64();
+            const auto *editorPtr = reinterpret_cast<juce::AudioProcessorEditor *>(static_cast<intptr_t>(ptrValue));
+
+            for (int i = 0; i < m_editors.size(); ++i)
+            {
+                if (m_editors[i].get() == editorPtr)
+                {
+                    remove_editor_at_index(i);
+                    break;
+                }
+            }
+        }
     }
 
     void EditorRack::buildPopupMenu()
@@ -208,5 +244,25 @@ namespace viator::gui::views
 
         for (auto &[cat, menu]: categories)
             m_plugin_selector.getRootMenu()->addSubMenu(cat, menu);
+    }
+
+    void EditorRack::remove_editor_at_index(const int index)
+    {
+        if (index < 0 || index >= m_editors.size())
+            return;
+
+        const auto &editor = m_editors[index];
+
+        if (!editor)
+            return;
+
+        removeChildComponent(editor.get());
+        m_editors.erase(m_editors.begin() + index);
+
+        processorRef.removeProcessor(index);
+
+        resized();
+
+        sendActionMessage(viator::globals::ActionCommands::editorDeleted);
     }
 }

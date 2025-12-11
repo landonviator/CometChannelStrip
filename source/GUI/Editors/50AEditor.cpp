@@ -21,11 +21,11 @@ namespace viator::gui::editors
 //==============================================================================
     void AmplificationEditor::paint(juce::Graphics &g)
     {
-        g.fillAll(juce::Colours::red);
-        g.drawText("50A", 0, 0, getWidth(), getHeight(), juce::Justification::centred);
+        //BaseEditor::paint(g);
     }
 
     void AmplificationEditor::resized()
     {
+        //BaseEditor::resized();
     }
 }

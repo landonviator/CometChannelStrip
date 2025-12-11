@@ -19,6 +19,10 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
     m_rack.rebuild_editors();
     initMacroKnobs();
 
+    m_view_port.setViewedComponent(&m_rack, false);
+    m_view_port.setScrollBarsShown(false, true);
+    addAndMakeVisible(m_view_port);
+
     refreshMacroMappings();
 
     setSize(1500, 700);
@@ -53,12 +57,21 @@ void AudioPluginAudioProcessorEditor::resized()
     auto y = padding;
     m_oversampling_menu.setBounds(x, y, width, height);
 
-    // RACK
-    width = getWidth();
-    height = juce::roundToInt(getHeight() * 0.8);
-    x = 0;
-    y = getHeight() / 10;
-    m_rack.setBounds(x, y, width, height);
+    const int rackX = juce::roundToInt(getWidth() * 0.0);
+    const int rackY = getHeight() / 10;
+    const int rackWidth = juce::roundToInt(getWidth());
+    const int rackHeight = juce::roundToInt(getHeight() * 0.8);
+    const int numEditors = static_cast<int>(m_rack.getEditors().size());
+    const auto rack_extra = juce::roundToInt((rackWidth * 0.25)) * numEditors;
+
+    m_rack.setParentWidth(rackWidth);
+    m_rack.setBounds(
+            rackX,
+            rackY,
+            numEditors < 4 ? rackWidth : rackWidth + rack_extra,
+            rackHeight);
+
+    m_view_port.setBounds(rackX, rackY, rackWidth, rackHeight);
 
     // MACRO DIALS
     x = juce::roundToInt(getWidth() * 0.026);
@@ -133,6 +146,13 @@ void AudioPluginAudioProcessorEditor::actionListenerCallback(const juce::String 
                 }
             }
         }
+
+        resized();
+    }
+
+    if (message == viator::globals::ActionCommands::editorDeleted)
+    {
+        resized();
     }
 }
 

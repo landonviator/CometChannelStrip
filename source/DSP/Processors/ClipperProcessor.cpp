@@ -15,6 +15,7 @@ namespace viator::dsp::processors
         initTreeState(this, std::move(layout));
         parameters = std::make_unique<ClipperParameters::parameters>(getTreeState(), id);
         getTreeState().addParameterListener(ClipperParameters::driveID + juce::String(id), this);
+        getTreeState().addParameterListener(ClipperParameters::clipTypeID + juce::String(id), this);
     }
 
     ClipperProcessor::~ClipperProcessor()
@@ -31,6 +32,12 @@ namespace viator::dsp::processors
                 0.0f,
                 30.0f,
                 0.0f));
+
+        const juce::StringArray choices = {"Soft", "Hard"};
+        params.push_back(std::make_unique<juce::AudioParameterChoice>(
+                juce::ParameterID{ClipperParameters::clipTypeID + juce::String(id), 1},
+                ClipperParameters::clipTypeName + juce::String(id),
+                choices, 0));
 
         return {params.begin(), params.end()};
     }
@@ -106,16 +113,28 @@ namespace viator::dsp::processors
 
     void ClipperProcessor::updateParameters()
     {
-        for (auto& drive : m_drive_smoothers)
+        for (auto &drive: m_drive_smoothers)
         {
             if (parameters->driveParam)
             {
-                const auto db_drive = juce::Decibels::decibelsToGain(parameters->driveParam->get());
+                const auto raw_drive = parameters->driveParam->get();
+                const auto db_drive = juce::Decibels::decibelsToGain(raw_drive);
                 drive.setTargetValue(db_drive);
             }
         }
-    }
 
+        for (auto &drive: m_drive_comp_smoothers)
+        {
+            if (parameters->driveParam)
+            {
+                const auto db_drive = juce::Decibels::decibelsToGain(parameters->driveParam->get() * -0.5f);
+                drive.setTargetValue(m_should_compensate ? db_drive : 1.0f);
+            }
+        }
+
+        const auto type = parameters->typeParam->getIndex();
+        m_current_type = static_cast<DistortionType>(type);
+    }
 
 //==============================================================================
     void ClipperProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
@@ -123,10 +142,19 @@ namespace viator::dsp::processors
         // Use this method as the place to do any pre-playback
         // initialisation that you need..
         juce::ignoreUnused(sampleRate, samplesPerBlock);
-        for (auto& drive : m_drive_smoothers)
+        for (auto &drive: m_drive_smoothers)
         {
             drive.reset(sampleRate <= 0 ? 44100.0f : sampleRate, 0.02);
         }
+
+        for (auto &drive: m_drive_comp_smoothers)
+        {
+            drive.reset(sampleRate <= 0 ? 44100.0f : sampleRate, 0.02);
+        }
+
+        spec.sampleRate = sampleRate;
+        spec.maximumBlockSize = samplesPerBlock;
+        spec.numChannels = getTotalNumOutputChannels();
     }
 
     void ClipperProcessor::releaseResources()
@@ -166,15 +194,41 @@ namespace viator::dsp::processors
 
         updateParameters();
 
-        for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
+        juce::dsp::AudioBlock<float> block(buffer);
+
+        switch (m_current_type)
         {
-            auto *data = buffer.getWritePointer(channel);
-            for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+            case DistortionType::kSoftClip: softClip(block, buffer.getNumSamples()); break;
+            case DistortionType::kHardClip: hardClip(block, buffer.getNumSamples()); break;
+        }
+    }
+
+    void ClipperProcessor::softClip(juce::dsp::AudioBlock<float> &block, const int num_samples)
+    {
+        for (size_t channel = 0; channel < block.getNumChannels(); ++channel)
+        {
+            auto *data = block.getChannelPointer(channel);
+            for (size_t sample = 0; sample < num_samples; ++sample)
             {
-                const auto drive = m_drive_smoothers[channel].getNextValue();
-                const auto xn = data[sample];
-                const auto yn = std::tanh(xn * drive);
-                data[sample] = yn;
+                const auto drive_comp = m_drive_comp_smoothers[channel].getNextValue();
+                const float xn = data[sample] * m_drive_smoothers[channel].getNextValue();
+                const float yn = m_two_by_pi * std::atan(xn) * 2.0f;
+                data[sample] = yn * drive_comp;
+            }
+        }
+    }
+
+    void ClipperProcessor::hardClip(juce::dsp::AudioBlock<float> &block, const int num_samples)
+    {
+        for (size_t channel = 0; channel < block.getNumChannels(); ++channel)
+        {
+            auto *data = block.getChannelPointer(channel);
+            for (size_t sample = 0; sample < num_samples; ++sample)
+            {
+                const auto drive_comp = m_drive_comp_smoothers[channel].getNextValue();
+                const float xn = data[sample] * m_drive_smoothers[channel].getNextValue();
+                const float yn = std::clamp(xn, -1.0f, 1.0f);
+                data[sample] = yn * drive_comp;
             }
         }
     }
@@ -187,6 +241,6 @@ namespace viator::dsp::processors
 
     juce::AudioProcessorEditor *ClipperProcessor::createEditor()
     {
-        return new viator::gui::editors::ClipperEditor (*this);
+        return new viator::gui::editors::ClipperEditor(*this);
     }
 }

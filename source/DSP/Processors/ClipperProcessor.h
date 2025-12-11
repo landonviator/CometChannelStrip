@@ -12,16 +12,22 @@ namespace ClipperParameters
     inline const juce::String driveID = "driveID";
     inline const juce::String driveName = "Drive";
 
+    inline const juce::String clipTypeID = "clipTypeID";
+    inline const juce::String clipTypeName = "Type";
+
     struct parameters
     {
         explicit parameters(const juce::AudioProcessorValueTreeState &state, int id)
         {
             driveParam = dynamic_cast<juce::AudioParameterFloat *>(state.getParameter(
                     ClipperParameters::driveID + juce::String(id)));
+            typeParam = dynamic_cast<juce::AudioParameterChoice *>(state.getParameter(
+                    ClipperParameters::clipTypeID + juce::String(id)));
 
         }
 
         juce::AudioParameterFloat *driveParam{nullptr};
+        juce::AudioParameterChoice *typeParam{nullptr};
     };
 }
 
@@ -72,14 +78,33 @@ namespace viator::dsp::processors
 
         void changeProgramName(int index, const juce::String &newName) override;
 
+        enum class DistortionType
+        {
+            kSoftClip,
+            kHardClip
+        };
+
     private:
         juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout(int id);
+
         void parameterChanged(const juce::String &parameterID, float newValue) override;
 
         std::unique_ptr<ClipperParameters::parameters> parameters;
-        std::array<juce::SmoothedValue<float>, 2> m_drive_smoothers;
+        std::array<juce::SmoothedValue<float>, 2> m_drive_smoothers, m_drive_comp_smoothers;
+
+        static constexpr float m_two_by_pi = 2.0f / juce::MathConstants<float>::pi;
 
         void updateParameters();
+
+        void softClip(juce::dsp::AudioBlock<float> &block, int num_samples);
+
+        void hardClip(juce::dsp::AudioBlock<float> &block, int num_samples);
+
+        int m_should_compensate{true};
+
+        juce::dsp::ProcessSpec spec;
+
+        DistortionType m_current_type = DistortionType::kSoftClip;
 
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ClipperProcessor)

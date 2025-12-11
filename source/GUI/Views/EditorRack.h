@@ -29,6 +29,9 @@ namespace viator::gui::views
         std::vector<std::unique_ptr<juce::AudioProcessorEditor>> &getEditors()
         { return m_editors; }
 
+        void setParentWidth(const int newWidth) { parent_width = newWidth; resized(); }
+
+
     private:
         AudioPluginAudioProcessor &processorRef;
         std::vector<std::unique_ptr<juce::AudioProcessorEditor>> m_editors;
@@ -49,6 +52,10 @@ namespace viator::gui::views
         juce::Point<int> drag_offset_from_top_left;
         int drag_original_index = -1;
 
+        int parent_width { 1 };
+
         void actionListenerCallback(const juce::String &message) override;
+
+        void remove_editor_at_index(const int index);
     };
 }
