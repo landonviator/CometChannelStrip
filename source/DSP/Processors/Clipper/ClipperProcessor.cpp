@@ -45,6 +45,11 @@ namespace viator::dsp::processors
             ClipperParameters::oversamplingChoiceName + juce::String(id),
             os_choices, 0));
 
+        params.push_back(std::make_unique<juce::AudioParameterBool>(
+            juce::ParameterID{ClipperParameters::muteID + juce::String(id), 1},
+            ClipperParameters::muteName + juce::String(id),
+            false));
+
         return {params.begin(), params.end()};
     }
 
@@ -124,6 +129,13 @@ namespace viator::dsp::processors
         {
             m_process_blocks[static_cast<size_t>(oversampling_choice)].updateParameters(*m_parameters);
         }
+
+        const auto should_mute = m_parameters->muteParam->get();
+
+        for (auto& mute : m_mutes)
+        {
+            mute.setTargetValue(!static_cast<float>(should_mute));
+        }
     }
 
     //==============================================================================
@@ -133,10 +145,17 @@ namespace viator::dsp::processors
         // initialisation that you need..
         juce::ignoreUnused(sampleRate, samplesPerBlock);
 
+        for (auto& mute : m_mutes)
+        {
+            mute.reset(sampleRate, 0.02);
+        }
+
         for (int i = 0; i < m_process_blocks.size(); ++i)
         {
             m_process_blocks[i].prepare(sampleRate, samplesPerBlock, getTotalNumInputChannels(), i);
         }
+
+        m_dry_buffer.setSize(getTotalNumOutputChannels(), sampleRate);
     }
 
     void ClipperProcessor::releaseResources()
@@ -176,11 +195,32 @@ namespace viator::dsp::processors
 
         updateParameters();
 
+        m_dry_buffer.clear();
+        for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
+        {
+            m_dry_buffer.copyFrom(channel, 0, buffer, channel, 0, buffer.getNumSamples());
+        }
+
         const auto oversampling_choice = m_parameters->oversamplingParam->getIndex();
-         if (oversampling_choice >= 0 && static_cast<size_t>(oversampling_choice) < m_process_blocks.size())
-         {
-             m_process_blocks[static_cast<size_t>(oversampling_choice)].process(buffer, buffer.getNumSamples());
-         }
+        if (oversampling_choice >= 0 && static_cast<size_t>(oversampling_choice) < m_process_blocks.size())
+        {
+            m_process_blocks[static_cast<size_t>(oversampling_choice)].process(buffer, buffer.getNumSamples());
+        }
+
+
+        for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
+        {
+            auto* data = buffer.getWritePointer(channel);
+            const auto* dry_data = m_dry_buffer.getWritePointer(channel);
+
+            for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+            {
+                const auto dry_sample = dry_data[sample];
+                const auto wet_sample = data[sample];
+                const auto mix = m_mutes[channel].getNextValue();
+                data[sample] = (1.0f - mix) * dry_sample + wet_sample * mix;
+            }
+        }
     }
 
     //==============================================================================

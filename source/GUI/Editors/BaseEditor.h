@@ -13,8 +13,7 @@
 
 namespace viator::gui::editors
 {
-class BaseEditor : public juce::AudioProcessorEditor, public juce::ActionBroadcaster
-    {
+    class BaseEditor : public juce::AudioProcessorEditor, public juce::ActionBroadcaster {
     public:
         explicit BaseEditor(viator::dsp::processors::BaseProcessor &);
 
@@ -26,16 +25,16 @@ class BaseEditor : public juce::AudioProcessorEditor, public juce::ActionBroadca
         void resized() override;
 
         std::vector<viator::gui::widgets::BaseSlider *> &getSliders()
-        { return m_sliders; }
-
-        enum SliderType
         {
+            return m_sliders;
+        }
+
+        enum SliderType {
             kInput = 0,
             kOutput
         };
 
-        enum ButtonType
-        {
+        enum ButtonType {
             kMute = 0,
             kSolo,
             kDelete
@@ -46,17 +45,22 @@ class BaseEditor : public juce::AudioProcessorEditor, public juce::ActionBroadca
         std::vector<viator::gui::widgets::BaseSlider *> m_sliders;
 
         std::array<juce::Slider, 2> m_io_sliders;
+
         void setSliderProps(juce::Slider &slider);
 
         std::array<juce::Label, 2> m_io_labels;
+
         void setLabelProps(juce::Label &label);
 
         juce::ComboBox m_preset_browser, m_oversampling_menu;
         std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> m_oversampling_menu_attach;
+
         void setComboBoxProps(juce::ComboBox &box, const juce::StringArray &items);
 
         std::array<juce::TextButton, 3> m_buttons;
-        void setButtonProps(juce::TextButton &button, const juce::String& name);
+        std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> m_mute_attach;
+
+        void setButtonProps(juce::TextButton &button, const juce::String &name);
 
         void showLabelHover();
 

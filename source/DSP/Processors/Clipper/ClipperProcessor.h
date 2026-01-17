@@ -54,7 +54,12 @@ namespace viator::dsp::processors
 
         void changeProgramName(int index, const juce::String &newName) override;
 
+        enum class MuteState {
+            kNormal,
+            kMuted
+        };
 
+        MuteState m_mute_state { MuteState::kNormal };
     private:
         static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout(int id);
 
@@ -65,6 +70,9 @@ namespace viator::dsp::processors
         void updateParameters();
 
         std::array<viator::dsp::ClipperProcessBlock, 5> m_process_blocks;
+
+        std::array<juce::SmoothedValue<float>, 2> m_mutes;
+        juce::AudioBuffer<float> m_dry_buffer;
 
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ClipperProcessor)

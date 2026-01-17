@@ -7,7 +7,7 @@
 namespace viator::gui::editors
 {
     BaseEditor::BaseEditor(viator::dsp::processors::BaseProcessor &p)
-            : AudioProcessorEditor(&p), processorRef(p)
+        : AudioProcessorEditor(&p), processorRef(p)
     {
         juce::ignoreUnused(processorRef);
 
@@ -34,12 +34,12 @@ namespace viator::gui::editors
         items = {"Off", "X2", "X4", "X8", "X16"};
         setComboBoxProps(m_oversampling_menu, items);
         m_oversampling_menu_attach = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(
-                    processorRef
-                            .getTreeState(),
-                    "oversamplingChoiceID" +
-                    juce::String(
-                            processorRef.getProcessorID()),
-                    m_oversampling_menu);
+            processorRef
+            .getTreeState(),
+            "oversamplingChoiceID" +
+            juce::String(
+                processorRef.getProcessorID()),
+            m_oversampling_menu);
 
         // BUTTONS
         setButtonProps(m_buttons[kMute], "M");
@@ -52,8 +52,15 @@ namespace viator::gui::editors
         m_buttons[kDelete].onClick = [this]()
         {
             const auto ptrValue = reinterpret_cast<std::uintptr_t>(this);
-            sendActionMessage(viator::globals::ActionCommands::editorDeleted + juce::String::toHexString(static_cast<juce::int64>(ptrValue)));
+            sendActionMessage(
+                viator::globals::ActionCommands::editorDeleted + juce::String::toHexString(static_cast<juce::int64>(ptrValue)));
         };
+
+        m_mute_attach = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(processorRef
+            .getTreeState(), "muteID" +
+                             juce::String(
+                                 processorRef.getProcessorID()),
+            m_buttons[kMute]);
 
         setSize(1000, 600);
     }
@@ -66,7 +73,7 @@ namespace viator::gui::editors
         m_oversampling_menu.setLookAndFeel(nullptr);
     }
 
-//==============================================================================
+    //==============================================================================
     void BaseEditor::paint(juce::Graphics &g)
     {
         drawHeaderAndFooter(g);
@@ -108,7 +115,7 @@ namespace viator::gui::editors
 
         width = juce::roundToInt(available * 0.116);
         x = m_oversampling_menu.getRight() + padding;
-        for (auto& button : m_buttons)
+        for (auto &button: m_buttons)
         {
             button.setBounds(x, y, width, height);
             x += width + padding;
@@ -144,7 +151,7 @@ namespace viator::gui::editors
         box.setSelectedId(1);
     }
 
-    void BaseEditor::setButtonProps(juce::TextButton &button, const juce::String& name)
+    void BaseEditor::setButtonProps(juce::TextButton &button, const juce::String &name)
     {
         button.setButtonText(name);
         button.setColour(juce::ComboBox::ColourIds::outlineColourId,
@@ -177,6 +184,6 @@ namespace viator::gui::editors
         g.setColour(viator::gui_utils::Colors::editor_bg_color());
         g.fillRect(getLocalBounds().withHeight(getHeight() / 10));
         g.fillRect(getLocalBounds().withHeight(getHeight() / 10).withY(
-                juce::roundToInt(getHeight() * 0.9)));
+            juce::roundToInt(getHeight() * 0.9)));
     }
 }

@@ -10,6 +10,9 @@ namespace ClipperParameters
     inline const juce::String oversamplingChoiceID = "oversamplingChoiceID";
     inline const juce::String oversamplingChoiceName = "oversamplingChoiceName";
 
+    inline const juce::String muteID = "muteID";
+    inline const juce::String muteName = "Mute";
+
     inline const juce::String driveID = "driveID";
     inline const juce::String driveName = "Drive";
 
@@ -25,11 +28,14 @@ namespace ClipperParameters
                 driveID + juce::String(id)));
             typeParam = dynamic_cast<juce::AudioParameterChoice *>(state.getParameter(
                 clipTypeID + juce::String(id)));
+            muteParam = dynamic_cast<juce::AudioParameterBool *>(state.getParameter(
+                muteID + juce::String(id)));
         }
 
         juce::AudioParameterChoice *oversamplingParam{nullptr};
         juce::AudioParameterFloat *driveParam{nullptr};
         juce::AudioParameterChoice *typeParam{nullptr};
+        juce::AudioParameterBool *muteParam{nullptr};
     };
 }
 

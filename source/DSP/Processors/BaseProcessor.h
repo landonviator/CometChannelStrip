@@ -37,11 +37,13 @@ class BaseProcessor : public juce::AudioProcessor
             getTreeState().state = state;
         }
     }
+
 private:
 
     std::unique_ptr<juce::AudioProcessorValueTreeState> m_tree_state;
 
     int m_processor_id { -1 };
+
     //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BaseProcessor)
     };
