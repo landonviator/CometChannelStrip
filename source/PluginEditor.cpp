@@ -9,10 +9,6 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 
     const auto items = viator::globals::Oversampling::items;
     setComboBoxProps(m_oversampling_menu, items);
-    m_oversampling_Attach = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(
-            processorRef.getTreeState(),
-            viator::parameters::oversamplingChoiceID,
-            m_oversampling_menu);
 
     addAndMakeVisible(m_rack);
     m_rack.addActionListener(this);
@@ -182,7 +178,7 @@ void AudioPluginAudioProcessorEditor::mouseDown(const juce::MouseEvent &event)
                     {
                         const auto state = static_cast<bool>(static_cast<int>(macro_state));
                         const auto is_macro = selected_macro == slider->getProperties().getWithDefault(
-                                viator::globals::WidgetProperties::macroKey, "");
+                                viator::globals::WidgetProperties::macroKey, "").toString();
                         slider->showMapping(state && is_macro);
                     }
                 }

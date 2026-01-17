@@ -52,6 +52,7 @@ class BaseEditor : public juce::AudioProcessorEditor, public juce::ActionBroadca
         void setLabelProps(juce::Label &label);
 
         juce::ComboBox m_preset_browser, m_oversampling_menu;
+        std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> m_oversampling_menu_attach;
         void setComboBoxProps(juce::ComboBox &box, const juce::StringArray &items);
 
         std::array<juce::TextButton, 3> m_buttons;

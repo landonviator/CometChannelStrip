@@ -33,6 +33,13 @@ namespace viator::gui::editors
         items.clear();
         items = {"Off", "X2", "X4", "X8", "X16"};
         setComboBoxProps(m_oversampling_menu, items);
+        m_oversampling_menu_attach = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(
+                    processorRef
+                            .getTreeState(),
+                    "oversamplingChoiceID" +
+                    juce::String(
+                            processorRef.getProcessorID()),
+                    m_oversampling_menu);
 
         // BUTTONS
         setButtonProps(m_buttons[kMute], "M");

@@ -34,7 +34,7 @@ namespace viator::gui::editors
                 m_drive_slider);
 
         // clip type menu
-        const juce::StringArray items = {"Soft", "Hard"};
+        juce::StringArray items = {"Soft", "Hard"};
         setComboBoxProps(m_clipper_type_menu, items);
         m_clipper_type_attach = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(
                 processorRef

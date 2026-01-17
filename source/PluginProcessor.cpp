@@ -97,10 +97,6 @@ juce::AudioProcessorValueTreeState::ParameterLayout AudioPluginAudioProcessor::c
 {
     std::vector<std::unique_ptr<juce::RangedAudioParameter> > params;
 
-    const auto items = viator::globals::Oversampling::items;
-    params.push_back(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{viator::parameters::oversamplingChoiceID, 1},
-                                                                  viator::parameters::oversamplingChoiceName, items, 0));
-
     params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{viator::parameters::macro1ID, 1},
                                                                  viator::parameters::macro1Name, 0.0f, 1.0f,
                                                                  0.0f));
@@ -131,8 +127,6 @@ juce::AudioProcessorValueTreeState::ParameterLayout AudioPluginAudioProcessor::c
     params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{viator::parameters::macro10ID, 1},
                                                                  viator::parameters::macro10Name, 0.0f, 1.0f,
                                                                  0.0f));
-
-
     return {params.begin(), params.end()};
 }
 
@@ -166,11 +160,6 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
     juce::ignoreUnused (sampleRate, samplesPerBlock);
-
-    for (int i = 0; i < m_process_blocks.size(); ++i)
-    {
-        m_process_blocks[i].prepare(sampleRate, samplesPerBlock, getTotalNumInputChannels(), i);
-    }
 
     for (const auto& processor : m_processors)
     {
@@ -223,12 +212,6 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     updateParameters();
 
     juce::ScopedNoDenormals noDenormals;
-
-//    const auto oversampling_choice = m_parameters->oversamplingParam->getIndex();
-//    if (oversampling_choice >= 0 && static_cast<size_t>(oversampling_choice) < m_process_blocks.size())
-//    {
-//        m_process_blocks[static_cast<size_t>(oversampling_choice)].process(buffer, buffer.getNumSamples());
-//    }
 
     for (int i = 0; i < m_processors.size(); ++ i)
     {

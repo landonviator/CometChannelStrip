@@ -3,7 +3,6 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "Globals/Parameters.h"
 #include "Globals/Globals.h"
-#include "DSP/ProcessBlock.h"
 #include "DSP/Processors/BaseProcessor.h"
 #include "DSP/Processors/ProcessorUtils.h"
 #include "Engine/MacroMap.h"
@@ -70,8 +69,6 @@ private:
     void updateParameters();
 
     std::unique_ptr<viator::parameters::parameters> m_parameters;
-
-    std::array<viator::dsp::ProcessBlock, 5> m_process_blocks;
 
     std::vector<std::unique_ptr<viator::dsp::processors::BaseProcessor>> m_processors;
 

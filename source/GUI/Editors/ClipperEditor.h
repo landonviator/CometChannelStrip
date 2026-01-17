@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "../../DSP/Processors/ClipperProcessor.h"
+#include "../../DSP/Processors/Clipper/ClipperProcessor.h"
 #include "BaseEditor.h"
 #include "../Widgets/BaseSlider.h"
 
