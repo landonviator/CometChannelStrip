@@ -13,7 +13,8 @@ namespace viator::dsp::processors
     {
         kClipper,
         k50A,
-        kTest
+        kTest,
+        kLV60GraphicEQ
     };
 
     struct ProcessorDefinition
@@ -69,6 +70,20 @@ namespace viator::dsp::processors
                             auto& typed = dynamic_cast<viator::dsp::processors::TestProcessor&>(processor);
                             return std::make_unique<viator::gui::editors::TestEditor>(typed);
                         }
+                },
+                {
+                    ProcessorType::kLV60GraphicEQ,
+                    "LV60GraphicEQ",
+                    "Test",
+                    [](int id)
+                    {
+                        return std::make_unique<viator::dsp::processors::LV60GraphicEQProcessor>(id);
+                    },
+                    [](juce::AudioProcessor& processor)
+                    {
+                        auto& typed = dynamic_cast<viator::dsp::processors::LV60GraphicEQProcessor&>(processor);
+                        return std::make_unique<viator::gui::editors::LV60GraphicEQEditor>(typed);
+                    }
                 }
         };
 
@@ -121,8 +136,8 @@ namespace viator::dsp::processors
 
         DBG("!! No match found. Falling back or asserting.");
         // fallback
-        if (auto *bc = dynamic_cast<viator::dsp::processors::ClipperProcessor *>(processor))
-            return std::make_unique<viator::gui::editors::ClipperEditor>(*bc);
+        if (auto *bc = dynamic_cast<viator::dsp::processors::TestProcessor *>(processor))
+            return std::make_unique<viator::gui::editors::TestEditor>(*bc);
 
         jassertfalse;
         return nullptr;

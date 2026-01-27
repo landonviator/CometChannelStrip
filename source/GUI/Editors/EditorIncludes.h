@@ -8,3 +8,4 @@
 #include "ClipperEditor.h"
 #include "50AEditor.h"
 #include "TestEditor.h"
+#include "EQ/LV60GraphicEQEditor.h"

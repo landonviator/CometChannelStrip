@@ -75,6 +75,8 @@ private:
     juce::CriticalSection m_processor_lock;
 
     viator::engine::MacroMap m_macro_map;
+
+    bool m_can_process { false };
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessor)
 };

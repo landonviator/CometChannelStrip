@@ -157,9 +157,7 @@ void AudioPluginAudioProcessor::updateParameters()
 //==============================================================================
 void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
-    juce::ignoreUnused (sampleRate, samplesPerBlock);
+    m_can_process = sampleRate > 0.0;
 
     for (const auto& processor : m_processors)
     {
@@ -203,6 +201,9 @@ bool AudioPluginAudioProcessor::isBusesLayoutSupported (const BusesLayout& layou
 void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
                                               juce::MidiBuffer& midiMessages)
 {
+    if (!m_can_process)
+        return;
+
     const juce::ScopedTryLock tryLock(m_processor_lock);
     if (!tryLock.isLocked())
         return;
