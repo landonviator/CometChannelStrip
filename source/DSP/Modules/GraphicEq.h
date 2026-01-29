@@ -68,13 +68,12 @@ namespace viator::dsp
 
         std::array<NotchFilter, 10> m_filters;
 
-        static constexpr float m_top_band_q {0.5f};
-        static constexpr float m_band_q {0.293f};
+        static constexpr float m_top_band_q{0.5f};
+        static constexpr float m_band_q{0.293f};
 
         float m_sample_rate{44100.0f};
         std::vector<float> m_cutoffs = {
-            31.0f, 63.0f, 125.0f, 250.0f, 500.0f, 1000.0f, 2000.0f, 4000.0f, 8000.0f,
-            16000.0f
+            16000.0f, 8000.0f, 4000.0f, 2000.0f, 1000.0f, 500.0f, 250.0f, 125.0f, 63.0f, 31.0f
         };
     };
 }

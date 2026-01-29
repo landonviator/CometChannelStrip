@@ -62,7 +62,7 @@ namespace viator::dsp::processors
             params.push_back(std::make_unique<juce::AudioParameterFloat>(
                 juce::ParameterID{LV60GraphicEQParameters::gainIDs[static_cast<size_t>(i)] + juce::String(id), 1},
                 "Gain " + juce::String(i + 1) + juce::String(id),
-                -24.0f, 24.0f, 0.0f));
+                -12.0f, 12.0f, 0.0f));
         }
 
         return {params.begin(), params.end()};

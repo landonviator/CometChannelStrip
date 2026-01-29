@@ -11,9 +11,29 @@ namespace viator::gui::editors
     {
         juce::ignoreUnused(processorRef);
 
-        for (auto& slider : m_main_sliders)
+        for (int i = 0; i < m_main_sliders.size(); ++i)
         {
-            setSliderProps(slider);
+            setSliderProps(m_main_sliders[i]);
+
+            m_main_sliders[i].onValueChange = [this, i]()
+            {
+                const auto value = m_main_sliders[i].getValue();
+                const auto text = value >= 1000.0 ? juce::String(value / 1000.0f, 2) + " kHz" : juce::String(value, 2);
+                m_main_labels[i].setText(text, juce::dontSendNotification);
+            };
+        }
+
+        m_main_sliders[kGain5].setColour(juce::Slider::ColourIds::thumbColourId, juce::Colour(220, 60, 40));
+
+        for (auto& label : m_main_labels)
+        {
+            setLabelProps(label);
+        }
+
+        for (int i = 0; i < m_gain_labels.size(); i++)
+        {
+            setLabelProps(m_gain_labels[i]);
+            m_gain_labels[i].setText(gain_labels[i], juce::dontSendNotification);
         }
 
         for (int i = 0; i < LV60GraphicEQParameters::numBands; ++i)
@@ -29,17 +49,28 @@ namespace viator::gui::editors
         m_drive_attach = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
                         (processorRef.getTreeState(), LV60GraphicEQParameters::driveID + juce::String(processorRef.getProcessorID()), m_main_sliders[kDrive]);
 
+        for (int i = 0; i < m_main_sliders.size(); ++i)
+        {
+            const auto value = m_main_sliders[i].getValue();
+            const auto text = value >= 1000.0 ? juce::String(value / 1000.0f, 2) + " kHz" : juce::String(value, 2);
+            m_main_labels[i].setText(text, juce::dontSendNotification);
+        }
+
         setSize(1000, 600);
     }
 
     LV60GraphicEQEditor::~LV60GraphicEQEditor()
     {
+        for (auto& slider : m_main_sliders)
+        {
+            slider.setLookAndFeel(nullptr);
+        }
     }
 
 //==============================================================================
     void LV60GraphicEQEditor::paint(juce::Graphics &g)
     {
-        g.fillAll(juce::Colours::black.brighter(0.15f));
+        g.fillAll(juce::Colour(0, 0, 0));//.withAlpha(0.85f));
         BaseEditor::paint(g);
     }
 
@@ -49,6 +80,7 @@ namespace viator::gui::editors
         auto y = juce::roundToInt(getHeight() * 0.12);
         auto width = juce::roundToInt(getWidth() * 0.6);
         const auto height = getHeight() / (num_sliders + 2);
+        auto font_size = static_cast<float>(getWidth()) * 0.05f;
 
         for (auto& slider : m_main_sliders)
         {
@@ -56,31 +88,71 @@ namespace viator::gui::editors
             y += height;
         }
 
+        for (int i = 0; i < m_main_sliders.size(); ++i)
+        {
+            const auto _x = m_main_sliders[i].getRight();
+            const auto _y = m_main_sliders[i].getY();
+            const auto _width = getWidth() - m_main_sliders[i].getRight();
+            m_main_labels[i].setBounds(_x, _y, _width, height);
+            m_main_labels[i].setFont(viator::gui_utils::Fonts::regular(font_size));
+
+            if (i > m_gain_labels.size() - 1)
+                continue;
+
+            m_gain_labels[i].setBounds(0, _y, _width, height);
+            m_gain_labels[i].setFont(viator::gui_utils::Fonts::regular(font_size));
+        }
+
         width = getWidth() / 5;
-        y = juce::roundToInt(getHeight() * 0.76);
-        m_main_sliders[kHP].setBounds(x, y, width, width);
+        y = juce::roundToInt(getHeight() * 0.8);
+        x = juce::roundToInt(getWidth() * 0.198);
+        const auto label_height = height / 2;
+        const auto filter_size = juce::roundToInt(width * 0.85);
+        font_size = static_cast<float>(getWidth()) * 0.035f;
+        m_main_sliders[kHP].setBounds(x, y, filter_size, filter_size);
+        m_main_labels[kHP].setBounds(x, m_main_sliders[kHP].getBottom(), width, label_height);
+        m_main_labels[kHP].setFont(viator::gui_utils::Fonts::regular(font_size));
         x += width;
         m_main_sliders[kDrive].setBounds(x, y, width, width);
-        x += width;
-        m_main_sliders[kLP].setBounds(x, y, width, width);
+        m_main_labels[kDrive].setBounds(x, m_main_sliders[kDrive].getBottom(), width, label_height);
+        m_main_labels[kDrive].setFont(viator::gui_utils::Fonts::regular(font_size));
+        x += width + (width - filter_size);
+        m_main_sliders[kLP].setBounds(x, y, filter_size, filter_size);
+        m_main_labels[kLP].setBounds(x, m_main_sliders[kLP].getBottom(), width, label_height);
+        m_main_labels[kLP].setFont(viator::gui_utils::Fonts::regular(font_size));
 
         BaseEditor::resized();
     }
 
     void LV60GraphicEQEditor::setSliderProps(juce::Slider &slider)
     {
+        slider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+
         if (&slider != &m_main_sliders[kDrive] &&
             &slider != &m_main_sliders[kHP] &&
             &slider != &m_main_sliders[kLP])
         {
             slider.setSliderStyle(juce::Slider::SliderStyle::LinearHorizontal);
+            slider.setColour(juce::Slider::ColourIds::backgroundColourId, juce::Colours::black);
+            slider.setColour(juce::Slider::ColourIds::trackColourId, juce::Colours::black);
+            slider.setColour(juce::Slider::ColourIds::thumbColourId, juce::Colour(240, 220, 200));
+            slider.setLookAndFeel(&m_slider_laf);
         } else
         {
             slider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
+            slider.setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, juce::Colour(215, 215, 215).withAlpha(0.85f));
+            slider.setColour(juce::Slider::ColourIds::thumbColourId, juce::Colour(5, 120, 190));
+            slider.setLookAndFeel(&m_dial_laf);
         }
 
-        slider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
         addAndMakeVisible(slider);
+    }
+
+    void LV60GraphicEQEditor::setLabelProps(juce::Label &label)
+    {
+        label.setJustificationType(juce::Justification::centred);
+        //label.setColour(juce::Label::outlineColourId, juce::Colours::white);
+        addAndMakeVisible(label);
     }
 
     void LV60GraphicEQEditor::setComboBoxProps(juce::ComboBox &box, const juce::StringArray &items)

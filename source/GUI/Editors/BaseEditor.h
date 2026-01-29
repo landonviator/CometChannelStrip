@@ -10,6 +10,7 @@
 #include "../Style/MenuLAF.h"
 #include "../Style/Colors.h"
 #include "../../Globals/Globals.h"
+#include "../Style/Images.h"
 
 namespace viator::gui::editors
 {

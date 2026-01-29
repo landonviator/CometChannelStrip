@@ -128,8 +128,8 @@ namespace viator::dsp
                 if (parameters.driveParam)
                 {
                     const auto raw_drive = parameters.driveParam->get();
-                    const auto safe_drive = juce::jlimit(0.0f, 50.0f, raw_drive);
-                    const auto db_drive = juce::Decibels::decibelsToGain(safe_drive);
+                    const auto safe_drive = juce::jlimit(0.0f, 10.0f, raw_drive);
+                    const auto db_drive = safe_drive * 0.1f;
                     drive.setTargetValue(db_drive);
                 }
             }
@@ -152,7 +152,7 @@ namespace viator::dsp
         std::unique_ptr<juce::dsp::Oversampling<float> > m_oversampler;
         std::array<juce::SmoothedValue<float>, 2> m_drive_smoothers;
         std::array<juce::dsp::LinkwitzRileyFilter<float>, 2> m_filters;
-
+        static constexpr float two_pi = 2.0f * juce::MathConstants<float>::pi;
         viator::dsp::GraphicEq<float> m_graphic_eq;
 
         void processSaturation(const juce::dsp::AudioBlock<float>& block, const int num_samples)
@@ -162,7 +162,7 @@ namespace viator::dsp
                 for (size_t sample = 0; sample < block.getNumSamples(); ++sample) {
                     const float xn = data[sample];
                     const float drive = m_drive_smoothers[channel].getNextValue();
-                    const float yn = std::tanh(xn * drive);
+                    const float yn = xn + (drive / two_pi) * std::sin(xn * two_pi);
                     data[sample] = yn;
                 }
             }

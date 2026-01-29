@@ -76,8 +76,16 @@ namespace viator::gui::editors
     //==============================================================================
     void BaseEditor::paint(juce::Graphics &g)
     {
-        drawHeaderAndFooter(g);
+        //drawHeaderAndFooter(g);
         showLabelHover();
+
+        const auto& texture = Images::texture();
+        g.setOpacity(0.2f);
+        g.drawImageWithin(texture, 0, 0, getWidth(), getHeight(), juce::RectanglePlacement::stretchToFit);
+        g.setOpacity(1.0f);
+
+        g.setColour(juce::Colours::white.withAlpha(0.5f));
+        g.drawRect(0, 0, getWidth(), getHeight(), 3);
     }
 
     void BaseEditor::resized()
@@ -85,10 +93,10 @@ namespace viator::gui::editors
         // SLIDERS
         const auto font_size = static_cast<float>(getWidth()) * 0.04f;
 
-        auto width = juce::roundToInt(getHeight() * 0.09);
+        auto width = juce::roundToInt(getHeight() * 0.05);
         auto height = width;
         auto x = 0;
-        auto y = juce::roundToInt(getHeight() * 0.905);
+        auto y = getHeight() - height;
         m_io_sliders[kInput].setBounds(x, y, width, height);
         m_io_sliders[kInput].setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
         m_io_labels[kInput].setBounds(m_io_sliders[kInput].getRight(), y, width, height);
