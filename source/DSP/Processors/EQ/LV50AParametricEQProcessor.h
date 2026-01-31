@@ -6,17 +6,17 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "../BaseProcessor.h"
-#include "LV60GraphicEQProcessBlock.h"
+#include "LV50AParametricEQProcessBlock.h"
 
 namespace viator::dsp::processors
 {
-    class LV60GraphicEQProcessor
+    class LV50AParametricEQProcessor
             : public viator::dsp::processors::BaseProcessor, public juce::AudioProcessorValueTreeState::Listener {
     public:
         //==============================================================================
-        explicit LV60GraphicEQProcessor(int id);
+        explicit LV50AParametricEQProcessor(int id);
 
-        ~LV60GraphicEQProcessor() override;
+        ~LV50AParametricEQProcessor() override;
 
         //==============================================================================
         void prepareToPlay(double sampleRate, int samplesPerBlock) override;
@@ -65,16 +65,16 @@ namespace viator::dsp::processors
 
         void parameterChanged(const juce::String &parameterID, float newValue) override;
 
-        std::unique_ptr<LV60GraphicEQParameters::parameters> m_parameters;
+        std::unique_ptr<LV50AParametricEQParameters::parameters> m_parameters;
 
         void updateParameters();
 
-        std::array<viator::dsp::LV60GraphicEQProcessBlock, 5> m_process_blocks;
+        std::array<viator::dsp::LV50AParametricEQProcessBlock, 5> m_process_blocks;
 
         std::array<juce::SmoothedValue<float>, 2> m_mutes;
         juce::AudioBuffer<float> m_dry_buffer;
 
         //==============================================================================
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LV60GraphicEQProcessor)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LV50AParametricEQProcessor)
     };
 }

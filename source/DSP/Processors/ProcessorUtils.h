@@ -14,7 +14,8 @@ namespace viator::dsp::processors
         kClipper,
         k50A,
         kTest,
-        kLV60GraphicEQ
+        kLV60GraphicEQ,
+        kLV50AParametricEQ,
     };
 
     struct ProcessorDefinition
@@ -74,7 +75,7 @@ namespace viator::dsp::processors
                 {
                     ProcessorType::kLV60GraphicEQ,
                     "LV60GraphicEQ",
-                    "Test",
+                    "EQ",
                     [](int id)
                     {
                         return std::make_unique<viator::dsp::processors::LV60GraphicEQProcessor>(id);
@@ -83,6 +84,20 @@ namespace viator::dsp::processors
                     {
                         auto& typed = dynamic_cast<viator::dsp::processors::LV60GraphicEQProcessor&>(processor);
                         return std::make_unique<viator::gui::editors::LV60GraphicEQEditor>(typed);
+                    }
+                },
+                {
+                    ProcessorType::kLV50AParametricEQ,
+                    "LV50AParametricEQ",
+                    "EQ",
+                    [](int id)
+                    {
+                        return std::make_unique<viator::dsp::processors::LV50AParametricEQProcessor>(id);
+                    },
+                    [](juce::AudioProcessor& processor)
+                    {
+                        auto& typed = dynamic_cast<viator::dsp::processors::LV50AParametricEQProcessor&>(processor);
+                        return std::make_unique<viator::gui::editors::LV50AParametricEQEditor>(typed);
                     }
                 }
         };

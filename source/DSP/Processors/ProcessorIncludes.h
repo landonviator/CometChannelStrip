@@ -6,3 +6,4 @@
 #include "50AProcessor.h"
 #include "TestProcessor.h"
 #include "EQ/LV60GraphicEQProcessor.h"
+#include "EQ/LV50AParametricEQProcessor.h"
