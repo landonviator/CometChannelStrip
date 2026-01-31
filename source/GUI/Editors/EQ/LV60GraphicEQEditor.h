@@ -79,7 +79,7 @@ namespace viator::gui::editors
 
         void setComboBoxProps(juce::ComboBox &box, const juce::StringArray &items);
 
-        std::array<juce::Slider, Sliders::num_sliders> m_main_sliders;
+        std::array<viator::gui::widgets::BaseSlider, Sliders::num_sliders> m_main_sliders;
         std::array<juce::Label, Sliders::num_sliders> m_main_labels;
         std::array<juce::Label, 10> m_gain_labels;
         std::vector<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> > main_slider_attaches;

@@ -10,10 +10,12 @@ namespace viator::gui::editors
             : viator::gui::editors::BaseEditor(p), processorRef(p)
     {
         juce::ignoreUnused(processorRef);
+        const auto id = juce::String(processorRef.getProcessorID());
 
         for (int i = 0; i < m_main_sliders.size(); ++i)
         {
             setSliderProps(m_main_sliders[i]);
+            getSliders().push_back(&m_main_sliders[i]);
 
             m_main_sliders[i].onValueChange = [this, i]()
             {
@@ -39,15 +41,23 @@ namespace viator::gui::editors
         for (int i = 0; i < LV60GraphicEQParameters::numBands; ++i)
         {
             main_slider_attaches.emplace_back(std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
-                (processorRef.getTreeState(), LV60GraphicEQParameters::gainIDs[i] + juce::String(processorRef.getProcessorID()), m_main_sliders[i]));
+                (processorRef.getTreeState(), LV60GraphicEQParameters::gainIDs[i] + id, m_main_sliders[i]));
         }
 
         m_hp_attach = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
-                (processorRef.getTreeState(), LV60GraphicEQParameters::hpCutoffID + juce::String(processorRef.getProcessorID()), m_main_sliders[kHP]);
+                (processorRef.getTreeState(), LV60GraphicEQParameters::hpCutoffID + id, m_main_sliders[kHP]);
         m_lp_attach = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
-                (processorRef.getTreeState(), LV60GraphicEQParameters::lpCutoffID + juce::String(processorRef.getProcessorID()), m_main_sliders[kLP]);
+                (processorRef.getTreeState(), LV60GraphicEQParameters::lpCutoffID + id, m_main_sliders[kLP]);
         m_drive_attach = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
-                        (processorRef.getTreeState(), LV60GraphicEQParameters::driveID + juce::String(processorRef.getProcessorID()), m_main_sliders[kDrive]);
+                        (processorRef.getTreeState(), LV60GraphicEQParameters::driveID + id, m_main_sliders[kDrive]);
+
+        for (int i = 0; i < LV60GraphicEQParameters::gainIDs.size(); ++i)
+        {
+            m_main_sliders[i].setComponentID(LV60GraphicEQParameters::gainIDs[i] + id);
+        }
+        m_main_sliders[kHP].setComponentID(LV60GraphicEQParameters::hpCutoffID + id);
+        m_main_sliders[kLP].setComponentID(LV60GraphicEQParameters::lpCutoffID + id);
+        m_main_sliders[kDrive].setComponentID(LV60GraphicEQParameters::driveID + id);
 
         for (int i = 0; i < m_main_sliders.size(); ++i)
         {
