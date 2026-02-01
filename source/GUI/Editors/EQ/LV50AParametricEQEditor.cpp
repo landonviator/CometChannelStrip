@@ -34,9 +34,9 @@ namespace viator::gui::editors
             main_slider_attaches.emplace_back(std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
                 (processorRef.getTreeState(), LV50AParametricEQParameters::cutoffIDs[i] + id, m_main_sliders[i + 8]));
 
-            m_main_sliders[i].setName("Gain " + juce::String(i+1));
-            m_main_sliders[i + 4].setName("Q " + juce::String(i+1));
-            m_main_sliders[i + 8].setName("Cutoff " + juce::String(i+1));
+            m_main_sliders[i].setName("Gain " + juce::String(i + 1));
+            m_main_sliders[i + 4].setName("Q " + juce::String(i + 1));
+            m_main_sliders[i + 8].setName("Cutoff " + juce::String(i + 1));
 
             m_main_sliders[i].setComponentID(LV50AParametricEQParameters::gainIDs[i] + id);
             m_main_sliders[i + 4].setComponentID(LV50AParametricEQParameters::qIDs[i] + id);
@@ -50,7 +50,7 @@ namespace viator::gui::editors
             m_main_sliders[i + 4].setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, green);
             m_main_sliders[i + 4].setColour(juce::Slider::ColourIds::thumbColourId, green.brighter(0.5f));
 
-            const auto blue  = juce::Colour(69, 104, 130);
+            const auto blue = juce::Colour(69, 104, 130);
             m_main_sliders[i + 8].setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, blue);
             m_main_sliders[i + 8].setColour(juce::Slider::ColourIds::thumbColourId, blue.brighter(0.5f));
         }
@@ -95,9 +95,8 @@ namespace viator::gui::editors
     //==============================================================================
     void LV50AParametricEQEditor::paint(juce::Graphics &g)
     {
-        g.fillAll(juce::Colour(0, 0, 0)); //.withAlpha(0.85f));
+        setBackgroundColor(juce::Colour(31, 61, 91));
         BaseEditor::paint(g);
-
         updateLabels();
     }
 

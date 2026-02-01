@@ -31,12 +31,11 @@ private:
 
     viator::gui::views::EditorRack m_rack;
 
-
     std::array<viator::gui::widgets::MacroSlider, 10> m_macro_knobs;
     std::vector<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>> m_macro_attaches;
 
     void initMacroKnobs();
-    viator::gui::laf::MacroLAF m_macro_laf;
+    viator::gui::laf::MacroLAF m_macro_laf {2};
     juce::Label m_macro_bg;
     viator::gui::laf::Billboard m_billboard_laf;
 

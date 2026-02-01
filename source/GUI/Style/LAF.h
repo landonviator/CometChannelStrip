@@ -86,8 +86,13 @@ namespace viator::gui::laf
     class MacroLAF final : public juce::LookAndFeel_V4
     {
     public:
+        explicit MacroLAF(const int num_decimal_places)
+        {
+            m_num_decimals = num_decimal_places;
+        }
+
         void drawRotarySlider ( juce::Graphics &g, int x, int y, int width, int height, float sliderPos,
-                                const float rotaryStartAngle, const float rotaryEndAngle, juce::Slider &slider )
+                                const float rotaryStartAngle, const float rotaryEndAngle, juce::Slider &slider ) override
         {
             auto outline = slider.findColour(juce::Slider::rotarySliderOutlineColourId);
             auto fill = slider.findColour(juce::Slider::rotarySliderFillColourId);
@@ -135,11 +140,14 @@ namespace viator::gui::laf
             g.setColour(slider.findColour(juce::Slider::thumbColourId));
             g.fillEllipse(juce::Rectangle<float>(thumbWidth, thumbWidth).withCentre(thumbPoint));
 
-            const auto text = slider.isMouseOverOrDragging() ? juce::String(slider.getValue(), 2) : slider.getName();
+            const auto text = slider.isMouseOverOrDragging() ? juce::String(slider.getValue(), m_num_decimals) : slider.getName();
             g.setColour(juce::Colours::whitesmoke);
-            g.setFont(viator::gui_utils::Fonts::bold(static_cast<float>(width) * 0.16f));
+            g.setFont(gui_utils::Fonts::bold(static_cast<float>(width) * 0.16f));
             g.drawFittedText(text, x, y, width, height, juce::Justification::centred, 2);
         }
+
+    private:
+        int m_num_decimals {0};
     };
 
     class Billboard final : public juce::LookAndFeel_V4

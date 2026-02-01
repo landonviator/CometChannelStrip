@@ -16,7 +16,7 @@ namespace viator::gui::editors
 {
     class BaseEditor : public juce::AudioProcessorEditor, public juce::ActionBroadcaster {
     public:
-        explicit BaseEditor(viator::dsp::processors::BaseProcessor &);
+        explicit BaseEditor(dsp::processors::BaseProcessor &);
 
         ~BaseEditor() override;
 
@@ -25,7 +25,7 @@ namespace viator::gui::editors
 
         void resized() override;
 
-        std::vector<viator::gui::widgets::BaseSlider *> &getSliders()
+        std::vector<widgets::BaseSlider *> &getSliders()
         {
             return m_sliders;
         }
@@ -41,33 +41,30 @@ namespace viator::gui::editors
             kDelete
         };
 
+        void setBackgroundColor(const juce::Colour colour) { m_comp_bg = colour; repaint(); };
+
     private:
-        viator::dsp::processors::BaseProcessor &processorRef;
-        std::vector<viator::gui::widgets::BaseSlider *> m_sliders;
+        dsp::processors::BaseProcessor &processorRef;
+        std::vector<widgets::BaseSlider *> m_sliders;
 
         std::array<juce::Slider, 2> m_io_sliders;
+        laf::MacroLAF m_io_laf {1};
 
-        void setSliderProps(juce::Slider &slider);
-
-        std::array<juce::Label, 2> m_io_labels;
-
-        void setLabelProps(juce::Label &label);
+        virtual void setSliderProps(juce::Slider &slider);
 
         juce::ComboBox m_preset_browser, m_oversampling_menu;
+        laf::MenuLAF m_menu_laf;
         std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> m_oversampling_menu_attach;
 
-        void setComboBoxProps(juce::ComboBox &box, const juce::StringArray &items);
+        virtual void setComboBoxProps(juce::ComboBox &box, const juce::StringArray &items);
 
         std::array<juce::TextButton, 3> m_buttons;
         std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> m_mute_attach;
-
         void setButtonProps(juce::TextButton &button, const juce::String &name);
-
-        void showLabelHover();
 
         void drawHeaderAndFooter(juce::Graphics &g);
 
-        viator::gui::laf::DialLAF m_dial_laf;
-        viator::gui::laf::MenuLAF m_menu_laf;
+        juce::Colour m_comp_bg = juce::Colours::blue;
+        juce::Colour m_widget_bg = juce::Colours::black.withAlpha(0.3f);
     };
 }

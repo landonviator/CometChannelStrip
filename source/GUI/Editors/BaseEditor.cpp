@@ -20,12 +20,6 @@ namespace viator::gui::editors
         m_io_sliders[kInput].setName("In");
         m_io_sliders[kOutput].setName("Out");
 
-        // LABELS
-        for (auto &label: m_io_labels)
-        {
-            setLabelProps(label);
-        }
-
         // MENUS
         juce::StringArray items = {"Presets"};
         setComboBoxProps(m_preset_browser, items);
@@ -76,16 +70,22 @@ namespace viator::gui::editors
     //==============================================================================
     void BaseEditor::paint(juce::Graphics &g)
     {
-        //drawHeaderAndFooter(g);
-        showLabelHover();
+        const auto bounds = getLocalBounds();
+        const auto main_colour = m_comp_bg;
+        constexpr auto contrast = 0.1;
+        const auto center_x = static_cast<float>(bounds.getCentreX());
+        const auto center_y = static_cast<float>(bounds.getCentreY());
+        const auto bottom = static_cast<float>(bounds.getBottom());
 
-        const auto& texture = Images::texture();
-        g.setOpacity(0.2f);
-        g.drawImageWithin(texture, 0, 0, getWidth(), getHeight(), juce::RectanglePlacement::stretchToFit);
-        g.setOpacity(1.0f);
+        const juce::ColourGradient gradient(
+            main_colour.brighter(contrast),center_x, center_y, main_colour.darker(contrast), center_x, bottom, true
+        );
 
-        g.setColour(juce::Colours::white.withAlpha(0.5f));
-        g.drawRect(0, 0, getWidth(), getHeight(), 3);
+        g.setGradientFill(gradient);
+        g.fillRect(bounds);
+
+        g.setColour(juce::Colour(73, 73, 73));
+        g.drawRect(0, 0, getWidth(), getHeight(), 2);
     }
 
     void BaseEditor::resized()
@@ -93,35 +93,29 @@ namespace viator::gui::editors
         // SLIDERS
         const auto font_size = static_cast<float>(getWidth()) * 0.04f;
 
-        auto width = juce::roundToInt(getHeight() * 0.05);
+        auto width = juce::roundToInt(getHeight() * 0.1);
         auto height = width;
         auto x = 0;
         auto y = getHeight() - height;
         m_io_sliders[kInput].setBounds(x, y, width, height);
         m_io_sliders[kInput].setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-        m_io_labels[kInput].setBounds(m_io_sliders[kInput].getRight(), y, width, height);
-        m_io_labels[kInput].setFont(viator::gui_utils::Fonts::regular(font_size));
 
         // LABELS
         x = getWidth() - width;
         m_io_sliders[kOutput].setBounds(x, y, width, height);
         m_io_sliders[kOutput].setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-        m_io_labels[kOutput].setBounds(m_io_sliders[kOutput].getX() - width, y, width, height);
-        m_io_labels[kOutput].setFont(viator::gui_utils::Fonts::regular(font_size));
 
         // MENUS
-        const auto padding = 2;
-        const auto available = getWidth() - 12;
-        width = juce::roundToInt(available * 0.4);
+        x = juce::roundToInt(getWidth() * 0.025);
+        width = juce::roundToInt(getWidth() * 0.3);
         height = juce::roundToInt(getHeight() * 0.05);
-        x = padding;
         y = juce::roundToInt(getHeight() * 0.025);
+        const auto padding = juce::roundToInt(getWidth() * 0.021);
         m_preset_browser.setBounds(x, y, width, height);
         x += width + padding;
-        width = juce::roundToInt(available * 0.25);
+        width = juce::roundToInt(width * 0.75);
         m_oversampling_menu.setBounds(x, y, width, height);
-
-        width = juce::roundToInt(available * 0.116);
+        width = juce::roundToInt(width * 0.5);
         x = m_oversampling_menu.getRight() + padding;
         for (auto &button: m_buttons)
         {
@@ -136,15 +130,8 @@ namespace viator::gui::editors
         slider.setColour(juce::Slider::ColourIds::thumbColourId, juce::Colours::whitesmoke);
         slider.setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, juce::Colours::dimgrey);
         slider.setColour(juce::Slider::ColourIds::rotarySliderFillColourId, juce::Colours::whitesmoke);
-        slider.setLookAndFeel(&m_dial_laf);
+        slider.setLookAndFeel(&m_io_laf);
         addAndMakeVisible(slider);
-    }
-
-    void BaseEditor::setLabelProps(juce::Label &label)
-    {
-        label.setJustificationType(juce::Justification::centred);
-        label.setText("Label", juce::dontSendNotification);
-        addAndMakeVisible(label);
     }
 
     void BaseEditor::setComboBoxProps(juce::ComboBox &box, const juce::StringArray &items)
@@ -152,7 +139,7 @@ namespace viator::gui::editors
         box.addItemList(items, 1);
         box.setLookAndFeel(&m_menu_laf);
         box.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
-        box.setColour(juce::ComboBox::ColourIds::backgroundColourId, viator::gui_utils::Colors::editor_minor_bg_color());
+        box.setColour(juce::ComboBox::ColourIds::backgroundColourId, m_widget_bg);
         box.getLookAndFeel().setColour(juce::PopupMenu::ColourIds::backgroundColourId,
                                        viator::gui_utils::Colors::editor_minor_bg_color());
         addAndMakeVisible(box);
@@ -165,33 +152,9 @@ namespace viator::gui::editors
         button.setColour(juce::ComboBox::ColourIds::outlineColourId,
                          juce::Colours::transparentBlack);
         button.setColour(juce::TextButton::ColourIds::buttonColourId,
-                         viator::gui_utils::Colors::editor_minor_bg_color());
+                         m_widget_bg);
         button.setColour(juce::TextButton::ColourIds::buttonOnColourId,
-                         viator::gui_utils::Colors::editor_minor_bg_color());
+                         m_widget_bg);
         addAndMakeVisible(button);
-    }
-
-    void BaseEditor::showLabelHover()
-    {
-        std::for_each(m_io_sliders.begin(), m_io_sliders.end(),
-                      [this, idx = 0](auto &slider) mutable
-                      {
-                          auto &label = m_io_labels[idx++];
-
-                          const auto isOver = slider.isMouseOverOrDragging();
-                          const auto value = slider.getValue();
-                          const auto name = slider.getName();
-
-                          label.setText(isOver ? juce::String(value, 2) : name,
-                                        juce::dontSendNotification);
-                      });
-    }
-
-    void BaseEditor::drawHeaderAndFooter(juce::Graphics &g)
-    {
-        g.setColour(viator::gui_utils::Colors::editor_bg_color());
-        g.fillRect(getLocalBounds().withHeight(getHeight() / 10));
-        g.fillRect(getLocalBounds().withHeight(getHeight() / 10).withY(
-            juce::roundToInt(getHeight() * 0.9)));
     }
 }
