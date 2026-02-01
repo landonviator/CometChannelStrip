@@ -12,6 +12,10 @@ namespace viator::globals
         static inline const juce::StringArray items = {"Off", "2X", "4X", "8X", "16X" };
     };
 
+    struct Size {
+        static inline const juce::StringArray items = {"50%", "75%", "100%", "125%", "150%", "175%", "200%"};
+    };
+
     enum class MacroLearnState
     {
         kOff,

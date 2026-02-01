@@ -82,4 +82,76 @@ namespace viator::gui::laf
             g.fillEllipse(juce::Rectangle<float>(thumbWidth, thumbWidth).withCentre(thumbPoint));
         }
     };
+
+    class MacroLAF final : public juce::LookAndFeel_V4
+    {
+    public:
+        void drawRotarySlider ( juce::Graphics &g, int x, int y, int width, int height, float sliderPos,
+                                const float rotaryStartAngle, const float rotaryEndAngle, juce::Slider &slider )
+        {
+            auto outline = slider.findColour(juce::Slider::rotarySliderOutlineColourId);
+            auto fill = slider.findColour(juce::Slider::rotarySliderFillColourId);
+
+            auto bounds = juce::Rectangle<int>(x, y, width, height).toFloat().reduced(10);
+
+            auto radius = juce::jmin(bounds.getWidth(), bounds.getHeight()) / 2.0f;
+            auto toAngle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
+            auto lineW = 2.0f;
+            auto arcRadius = radius - lineW * 0.5f;
+
+            juce::Path backgroundArc;
+            backgroundArc.addCentredArc(bounds.getCentreX(),
+                                        bounds.getCentreY(),
+                                        arcRadius,
+                                        arcRadius,
+                                        0.0f,
+                                        rotaryStartAngle,
+                                        rotaryEndAngle,
+                                        true);
+
+            g.setColour(outline);
+            g.strokePath(backgroundArc, juce::PathStrokeType(lineW, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+            if (slider.isEnabled())
+            {
+                juce::Path valueArc;
+                valueArc.addCentredArc(bounds.getCentreX(),
+                                       bounds.getCentreY(),
+                                       arcRadius,
+                                       arcRadius,
+                                       0.0f,
+                                       rotaryStartAngle,
+                                       toAngle,
+                                       true);
+
+                g.setColour(fill);
+                g.strokePath(valueArc, juce::PathStrokeType(lineW, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+            }
+
+            auto thumbWidth = lineW * 2.0f;
+            juce::Point<float> thumbPoint(bounds.getCentreX() + arcRadius * std::cos(toAngle - juce::MathConstants<float>::halfPi),
+                                    bounds.getCentreY() + arcRadius * std::sin(toAngle - juce::MathConstants<float>::halfPi));
+
+            g.setColour(slider.findColour(juce::Slider::thumbColourId));
+            g.fillEllipse(juce::Rectangle<float>(thumbWidth, thumbWidth).withCentre(thumbPoint));
+
+            const auto text = slider.isMouseOverOrDragging() ? juce::String(slider.getValue(), 2) : slider.getName();
+            g.setColour(juce::Colours::whitesmoke);
+            g.setFont(viator::gui_utils::Fonts::bold(static_cast<float>(width) * 0.16f));
+            g.drawFittedText(text, x, y, width, height, juce::Justification::centred, 2);
+        }
+    };
+
+    class Billboard final : public juce::LookAndFeel_V4
+    {
+    public:
+        void drawLabel ( juce::Graphics &g, juce::Label &label ) override
+        {
+            g.setColour(label.findColour(juce::Label::backgroundColourId));
+            g.fillRoundedRectangle(label.getLocalBounds().toFloat().reduced(3.0f, 3.0f), 9.0f);
+
+            g.setColour(label.findColour(juce::Label::outlineColourId));
+            g.drawRoundedRectangle(label.getLocalBounds().toFloat().reduced(3.0f, 3.0f), 9.0f, 2.0f);
+        }
+    };
 }

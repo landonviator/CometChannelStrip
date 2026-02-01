@@ -7,12 +7,34 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 {
     juce::ignoreUnused(processorRef);
 
-    const auto items = viator::globals::Oversampling::items;
-    setComboBoxProps(m_oversampling_menu, items);
+    const auto items = viator::globals::Size::items;
+    setComboBoxProps(m_size_menu, items);
+
+    m_size_menu.onChange = [this]()
+    {
+        constexpr auto base_width = 1400;
+
+        std::unordered_map<int, double> size_map =
+        {
+            {0, 0.5},  {1, 0.75}, {2, 1.0}, {3, 1.25}, {4, 1.5}, {5, 1.75}, {6, 2.0}
+        };
+
+        const auto choice = m_size_menu.getSelectedItemIndex();
+        const auto width = juce::roundToInt(base_width * size_map[choice]);
+        const auto height = width / 2;
+        setSize(width, height);
+    };
 
     addAndMakeVisible(m_rack);
     m_rack.addActionListener(this);
     m_rack.rebuild_editors();
+
+    m_macro_bg.setEditable(false);
+    m_macro_bg.setColour(juce::Label::ColourIds::outlineColourId, juce::Colour(73, 73, 73));
+    m_macro_bg.setColour(juce::Label::ColourIds::backgroundColourId, juce::Colour(31, 31, 31));
+    m_macro_bg.setLookAndFeel(&m_billboard_laf);
+    addAndMakeVisible(m_macro_bg);
+
     initMacroKnobs();
 
     m_view_port.setViewedComponent(&m_rack, false);
@@ -21,7 +43,10 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 
     refreshMacroMappings();
 
-    setSize(1500, 700);
+    setResizable(true, false);
+    getConstrainer()->setFixedAspectRatio(2.0);
+    setResizeLimits(700, 350, 2800, 1400);
+    setSize(1400, 700);
 }
 
 AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
@@ -29,9 +54,12 @@ AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
     for (auto &macro: m_macro_knobs)
     {
         macro.removeMouseListener(this);
+        macro.setLookAndFeel(nullptr);
     }
 
     m_rack.removeActionListener(this);
+
+    m_macro_bg.setLookAndFeel(nullptr);
 }
 
 //==============================================================================
@@ -45,18 +73,18 @@ void AudioPluginAudioProcessorEditor::paint(juce::Graphics &g)
 
 void AudioPluginAudioProcessorEditor::resized()
 {
-    // OS MENU
-    const auto padding = juce::roundToInt(getWidth() * 0.03);
-    auto width = juce::roundToInt(getWidth() * 0.1);
-    auto height = juce::roundToInt(getHeight() * 0.05);
-    auto x = getWidth() - width - padding;
-    auto y = padding;
-    m_oversampling_menu.setBounds(x, y, width, height);
+    // SIZE MENU
+    auto padding = juce::roundToInt(getHeight() * 0.01);
+    const auto width = juce::roundToInt(getWidth() * 0.1);
+    const auto x = getWidth() - width - padding;
+    const auto y = padding;
+    const auto height = juce::roundToInt(getHeight() * 0.05);
+    m_size_menu.setBounds(x, y, width, height);
 
-    const int rackX = juce::roundToInt(getWidth() * 0.0);
+    const int rackX = juce::roundToInt(getWidth() * 0.05);
     const int rackY = getHeight() / 10;
-    const int rackWidth = juce::roundToInt(getWidth());
-    const int rackHeight = juce::roundToInt(getHeight() * 0.8);
+    const int rackWidth = juce::roundToInt(getWidth() * 0.9);
+    const int rackHeight = juce::roundToInt(getHeight() * 0.76);
     const int numEditors = static_cast<int>(m_rack.getEditors().size());
     const auto rack_extra = juce::roundToInt((rackWidth * 0.25)) * numEditors;
 
@@ -70,21 +98,29 @@ void AudioPluginAudioProcessorEditor::resized()
     m_view_port.setBounds(rackX, rackY, rackWidth, rackHeight);
 
     // MACRO DIALS
-    x = juce::roundToInt(getWidth() * 0.026);
-    y = juce::roundToInt(getHeight() * 0.9);
-    width = juce::roundToInt(getWidth() * 0.05);
-    height = width;
-    for (auto &knob: m_macro_knobs)
+    const auto macroX = juce::roundToInt(getWidth() * 0.08);
+    const auto macroY = juce::roundToInt(getHeight() * 0.88);
+    const auto macroWidth = juce::roundToInt(getWidth() * 0.84);
+    const auto macroHeight = juce::roundToInt(getHeight() * 0.1);
+    m_macro_bg.setBounds(macroX, macroY, macroWidth, macroHeight);
+
+    // Macro Dials
+    auto compX = juce::roundToInt(getWidth() * 0.1);
+    const auto compY = juce::roundToInt(getHeight() * 0.875);
+    const auto compWidth = juce::roundToInt(getWidth() * 0.05);
+    const auto compHeight = juce::roundToInt(compWidth * 1.089);
+    padding = juce::roundToInt(getWidth() * 0.033);
+    for (auto &dial: m_macro_knobs)
     {
-        knob.setBounds(x, y, width, height);
-        x += width * 2;
+        dial.setBounds(compX, compY, compWidth, compHeight);
+        compX += compWidth + padding;
     }
 }
 
 void AudioPluginAudioProcessorEditor::setComboBoxProps(juce::ComboBox &box, const juce::StringArray &items)
 {
     box.addItemList(items, 1);
-    box.setSelectedId(1, juce::dontSendNotification);
+    box.setSelectedId(3, juce::dontSendNotification);
     addAndMakeVisible(box);
 }
 
@@ -95,7 +131,12 @@ void AudioPluginAudioProcessorEditor::initMacroKnobs()
         m_macro_knobs[i].setSliderStyle(juce::Slider::RotaryVerticalDrag);
         m_macro_knobs[i].setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
         m_macro_knobs[i].setComponentID("macro" + juce::String(i + 1) + "ID");
+        m_macro_knobs[i].setName("Macro\n" + juce::String(i+1));
         m_macro_knobs[i].addMouseListener(this, true);
+        m_macro_knobs[i].setColour(juce::Slider::ColourIds::thumbColourId, juce::Colours::transparentWhite);
+        m_macro_knobs[i].setColour(juce::Slider::ColourIds::rotarySliderFillColourId, juce::Colour(234, 234, 234));
+        m_macro_knobs[i].setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, juce::Colour(73, 73, 73));
+        m_macro_knobs[i].setLookAndFeel(&m_macro_laf);
         m_macro_attaches.emplace_back(
                 std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processorRef
                                                                                                .getTreeState(),

@@ -48,21 +48,20 @@ namespace viator::gui::views
 
     void EditorRack::paint(juce::Graphics &g)
     {
-        g.setColour(juce::Colours::wheat);
-        g.drawRect(getLocalBounds());
+        g.fillAll(juce::Colours::black.withAlpha(0.5f));
     }
 
     void EditorRack::resized()
     {
-
-        auto x = juce::roundToInt(getWidth() * 0);
-        auto y = juce::roundToInt(getHeight() * 0);
-        auto width = juce::roundToInt(parent_width * 0.25);
-        auto height = juce::roundToInt(getHeight());
+        constexpr auto padding = 2;
+        auto x = padding;
+        const auto y = padding;
+        const auto width = juce::roundToInt(parent_width * 0.25) - padding * 2;
+        const auto height = juce::roundToInt(getHeight()) - padding * 6;
         for (const auto &m_editor: m_editors)
         {
             m_editor->setBounds(x, y, width, height);
-            x += width;
+            x += width + padding * 2;
         }
 
         const auto is_empty = m_editors.empty();

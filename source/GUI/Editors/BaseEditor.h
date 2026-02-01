@@ -6,7 +6,7 @@
 
 #include "../../DSP/Processors/BaseProcessor.h"
 #include "../Widgets/BaseSlider.h"
-#include "../Style/DialLAF.h"
+#include "../Style/LAF.h"
 #include "../Style/MenuLAF.h"
 #include "../Style/Colors.h"
 #include "../../Globals/Globals.h"

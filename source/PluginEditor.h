@@ -24,7 +24,7 @@ private:
     // access the processor object that created it.
     AudioPluginAudioProcessor &processorRef;
 
-    juce::ComboBox m_oversampling_menu;
+    juce::ComboBox m_size_menu;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> m_oversampling_Attach;
 
     void setComboBoxProps(juce::ComboBox &box, const juce::StringArray &items);
@@ -36,6 +36,9 @@ private:
     std::vector<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>> m_macro_attaches;
 
     void initMacroKnobs();
+    viator::gui::laf::MacroLAF m_macro_laf;
+    juce::Label m_macro_bg;
+    viator::gui::laf::Billboard m_billboard_laf;
 
     void changeListenerCallback(juce::ChangeBroadcaster *source) override;
 
