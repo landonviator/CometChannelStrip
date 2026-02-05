@@ -72,7 +72,7 @@ namespace viator::gui::editors
     {
         const auto bounds = getLocalBounds();
         const auto main_colour = m_comp_bg;
-        constexpr auto contrast = 0.1;
+        constexpr auto contrast = 0.05;
         const auto center_x = static_cast<float>(bounds.getCentreX());
         const auto center_y = static_cast<float>(bounds.getCentreY());
         const auto bottom = static_cast<float>(bounds.getBottom());
@@ -127,7 +127,7 @@ namespace viator::gui::editors
     void BaseEditor::setSliderProps(juce::Slider &slider)
     {
         slider.setSliderStyle(juce::Slider::RotaryVerticalDrag);
-        slider.setColour(juce::Slider::ColourIds::thumbColourId, juce::Colours::whitesmoke);
+        slider.setColour(juce::Slider::ColourIds::thumbColourId, juce::Colours::transparentBlack);
         slider.setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, juce::Colours::dimgrey);
         slider.setColour(juce::Slider::ColourIds::rotarySliderFillColourId, juce::Colours::whitesmoke);
         slider.setLookAndFeel(&m_io_laf);

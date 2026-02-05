@@ -95,7 +95,7 @@ namespace viator::gui::editors
     //==============================================================================
     void LV50AParametricEQEditor::paint(juce::Graphics &g)
     {
-        setBackgroundColor(juce::Colour(31, 61, 91));
+        setBackgroundColor(juce::Colour(19, 36, 64));
         BaseEditor::paint(g);
         updateLabels();
     }
@@ -146,7 +146,7 @@ namespace viator::gui::editors
         slider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
         slider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
         slider.setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, juce::Colour(215, 215, 215).withAlpha(0.85f));
-        slider.setColour(juce::Slider::ColourIds::thumbColourId, juce::Colour(5, 120, 190));
+        slider.setColour(juce::Slider::ColourIds::rotarySliderFillColourId, juce::Colour(211, 218, 217));
         slider.setLookAndFeel(&m_dial_laf);
 
         addAndMakeVisible(slider);

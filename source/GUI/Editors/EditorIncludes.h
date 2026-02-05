@@ -10,3 +10,4 @@
 #include "TestEditor.h"
 #include "EQ/LV60GraphicEQEditor.h"
 #include "EQ/LV50AParametricEQEditor.h"
+#include "EQ/LVPultecEQEditor.h"

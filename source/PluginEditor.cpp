@@ -65,7 +65,7 @@ AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
 //==============================================================================
 void AudioPluginAudioProcessorEditor::paint(juce::Graphics &g)
 {
-    g.fillAll(juce::Colours::black.brighter(0.12f));
+    g.fillAll(juce::Colour(10, 10, 10));
 
     g.setColour(juce::Colours::black);
     g.drawRect(0, 0, getWidth(), getHeight(), 3);

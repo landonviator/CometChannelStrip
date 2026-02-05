@@ -9,6 +9,12 @@ namespace viator::gui::views
 {
     EditorRack::EditorRack(AudioPluginAudioProcessor &p) : processorRef(p)
     {
+        const auto shadow_color = juce::Colours::black;
+        auto shadow = juce::DropShadow(shadow_color, 25, {0, 10});
+
+        m_drop_shadow = std::make_unique<juce::DropShadower>(shadow);
+        m_drop_shadow->setOwner(this);
+
         processorRef.addActionListener(this);
 
         m_plugin_selector.setTextWhenNothingSelected("Add Plugin Module");
@@ -48,7 +54,7 @@ namespace viator::gui::views
 
     void EditorRack::paint(juce::Graphics &g)
     {
-        g.fillAll(juce::Colours::black.withAlpha(0.5f));
+        //g.fillAll(juce::Colours::black.withAlpha(0.5f));
     }
 
     void EditorRack::resized()

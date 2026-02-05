@@ -57,5 +57,7 @@ namespace viator::gui::views
         void actionListenerCallback(const juce::String &message) override;
 
         void remove_editor_at_index(const int index);
+
+        std::unique_ptr<juce::DropShadower> m_drop_shadow;
     };
 }
