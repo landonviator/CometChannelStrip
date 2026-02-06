@@ -29,10 +29,6 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
     m_rack.addActionListener(this);
     m_rack.rebuild_editors();
 
-    m_macro_bg.setEditable(false);
-    m_macro_bg.setColour(juce::Label::ColourIds::outlineColourId, juce::Colour(73, 73, 73));
-    m_macro_bg.setColour(juce::Label::ColourIds::backgroundColourId, juce::Colour(31, 31, 31));
-    m_macro_bg.setLookAndFeel(&m_billboard_laf);
     addAndMakeVisible(m_macro_bg);
 
     initMacroKnobs();
@@ -65,7 +61,7 @@ AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
 //==============================================================================
 void AudioPluginAudioProcessorEditor::paint(juce::Graphics &g)
 {
-    g.fillAll(juce::Colour(10, 10, 10));
+    g.fillAll(juce::Colour(31, 32, 34));
 
     g.setColour(juce::Colours::black);
     g.drawRect(0, 0, getWidth(), getHeight(), 3);
@@ -99,9 +95,9 @@ void AudioPluginAudioProcessorEditor::resized()
 
     // MACRO DIALS
     const auto macroX = juce::roundToInt(getWidth() * 0.08);
-    const auto macroY = juce::roundToInt(getHeight() * 0.88);
+    const auto macroY = juce::roundToInt(getHeight() * 0.86);
     const auto macroWidth = juce::roundToInt(getWidth() * 0.84);
-    const auto macroHeight = juce::roundToInt(getHeight() * 0.1);
+    const auto macroHeight = juce::roundToInt(getHeight() * 0.135);
     m_macro_bg.setBounds(macroX, macroY, macroWidth, macroHeight);
 
     // Macro Dials

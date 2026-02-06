@@ -56,7 +56,7 @@ namespace viator::gui::editors
     //==============================================================================
     void LVPultecEQEditor::paint(juce::Graphics &g)
     {
-        setBackgroundColor(juce::Colour(19, 36, 64));
+        setBackgroundColor(juce::Colour(0, 108, 133));
         BaseEditor::paint(g);
         updateLabels();
     }
@@ -65,7 +65,7 @@ namespace viator::gui::editors
     {
         const auto width = juce::roundToInt(getWidth() * 0.25);
         auto x = juce::roundToInt(getWidth() * 0.05);
-        auto y = juce::roundToInt(getHeight() - width * 1.8);
+        auto y = juce::roundToInt(getHeight() - width * 2.0);
         const auto padding_y = juce::roundToInt(getWidth() * 0.09);
         const auto padding_x = juce::roundToInt(width * 0.16);
         const auto font_size = static_cast<float>(getWidth()) * 0.035f;
@@ -76,7 +76,7 @@ namespace viator::gui::editors
             y -= width + padding_y;
         }
 
-        y = juce::roundToInt(getHeight() - width * 1.8);
+        y = juce::roundToInt(getHeight() - width * 2.0);
         x = getWidth() - x - width;
         for (int i = 4; i < 8; ++i)
         {
@@ -101,6 +101,7 @@ namespace viator::gui::editors
         slider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
         slider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
         slider.setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, juce::Colour(215, 215, 215).withAlpha(0.85f));
+        slider.setColour(juce::Slider::ColourIds::trackColourId, juce::Colour(0, 0, 0));
         slider.setColour(juce::Slider::ColourIds::rotarySliderFillColourId, juce::Colour(211, 218, 217));
         slider.setLookAndFeel(&m_dial_laf);
 

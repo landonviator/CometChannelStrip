@@ -4,6 +4,7 @@
 #include "GUI/Editors/BaseEditor.h"
 #include "GUI/Views/EditorRack.h"
 #include "GUI/Widgets/MacroSlider.h"
+#include "GUI/Widgets/Billboard.h"
 
 //==============================================================================
 class AudioPluginAudioProcessorEditor final
@@ -36,7 +37,8 @@ private:
 
     void initMacroKnobs();
     viator::gui::laf::MacroLAF m_macro_laf {2};
-    juce::Label m_macro_bg;
+    //juce::Label m_macro_bg;
+    RoundedBackdrop m_macro_bg;
     viator::gui::laf::Billboard m_billboard_laf;
 
     void changeListenerCallback(juce::ChangeBroadcaster *source) override;

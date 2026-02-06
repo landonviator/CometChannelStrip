@@ -12,8 +12,7 @@ namespace viator::gui::editors
         juce::ignoreUnused(processorRef);
 
         // SLIDERS
-        for (auto &slider: m_io_sliders)
-        {
+        for (auto &slider: m_io_sliders) {
             setSliderProps(slider);
         }
 
@@ -70,33 +69,49 @@ namespace viator::gui::editors
     //==============================================================================
     void BaseEditor::paint(juce::Graphics &g)
     {
-        const auto bounds = getLocalBounds();
-        const auto main_colour = m_comp_bg;
-        constexpr auto contrast = 0.05;
-        const auto center_x = static_cast<float>(bounds.getCentreX());
-        const auto center_y = static_cast<float>(bounds.getCentreY());
-        const auto bottom = static_cast<float>(bounds.getBottom());
+        // g.drawImageWithin(Images::bd_d(), 0, 0, getWidth(), getHeight(), juce::RectanglePlacement::stretchToFit);
+        //
+        // const auto bounds = getLocalBounds();
+        // const auto main_colour = m_comp_bg;
+        // constexpr auto contrast = 0.05;
+        // const auto alpha = JUCE_LIVE_CONSTANT(1.0f);
+        // const auto center_x = static_cast<float>(bounds.getCentreX());
+        // const auto center_y = static_cast<float>(bounds.getCentreY());
+        // const auto bottom = static_cast<float>(bounds.getBottom());
+        //
+        // const juce::ColourGradient gradient(
+        //     main_colour.brighter(contrast).withAlpha(alpha),center_x, center_y,
+        //     main_colour.darker(contrast).withAlpha(alpha), center_x, bottom, true
+        // );
+        //
+        // g.setGradientFill(gradient);
+        // g.fillRect(bounds);
 
-        const juce::ColourGradient gradient(
-            main_colour.brighter(contrast),center_x, center_y, main_colour.darker(contrast), center_x, bottom, true
-        );
+        g.fillAll(juce::Colour(44, 43, 42));
 
-        g.setGradientFill(gradient);
-        g.fillRect(bounds);
 
-        g.setColour(juce::Colour(73, 73, 73));
+        g.setColour(juce::Colour(74, 73, 71));
+        g.fillRect(2, 0, getWidth() - 2, juce::roundToInt(getHeight() * 0.05) + 12);
+        g.fillRect(2, juce::roundToInt(getHeight() * 0.91), getWidth() - 2, juce::roundToInt(getHeight() * 0.09));
+
+        g.setColour(juce::Colour(0, 0, 0));
         g.drawRect(0, 0, getWidth(), getHeight(), 2);
+
+        g.setColour(juce::Colour(21, 21, 21));
+        auto y = static_cast<float>(getHeight()) * 0.05f + 12.0f;
+        g.drawLine(0.0f, y, static_cast<float>(getWidth()), y, 2.0f);
+
+        y = static_cast<float>(getHeight()) * 0.91f;
+        g.drawLine(0.0f, y, static_cast<float>(getWidth()), y, 2.0f);
     }
 
     void BaseEditor::resized()
     {
         // SLIDERS
-        const auto font_size = static_cast<float>(getWidth()) * 0.04f;
-
         auto width = juce::roundToInt(getHeight() * 0.1);
         auto height = width;
         auto x = 0;
-        auto y = getHeight() - height;
+        auto y = juce::roundToInt(getHeight() * 0.91);
         m_io_sliders[kInput].setBounds(x, y, width, height);
         m_io_sliders[kInput].setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
 
@@ -109,7 +124,7 @@ namespace viator::gui::editors
         x = juce::roundToInt(getWidth() * 0.025);
         width = juce::roundToInt(getWidth() * 0.3);
         height = juce::roundToInt(getHeight() * 0.05);
-        y = juce::roundToInt(getHeight() * 0.025);
+        y = 6;
         const auto padding = juce::roundToInt(getWidth() * 0.021);
         m_preset_browser.setBounds(x, y, width, height);
         x += width + padding;
@@ -117,8 +132,7 @@ namespace viator::gui::editors
         m_oversampling_menu.setBounds(x, y, width, height);
         width = juce::roundToInt(width * 0.5);
         x = m_oversampling_menu.getRight() + padding;
-        for (auto &button: m_buttons)
-        {
+        for (auto &button: m_buttons) {
             button.setBounds(x, y, width, height);
             x += width + padding;
         }
