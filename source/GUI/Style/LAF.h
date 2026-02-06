@@ -16,7 +16,6 @@ namespace viator::gui::laf
                               const float sliderPos, const float rotaryStartAngle, const float rotaryEndAngle,
                               juce::Slider &slider) override
         {
-
             auto b = juce::Rectangle<float>((float) x, (float) y, (float) width, (float) height).reduced(2.0f);
             auto centre = b.getCentre();
             auto r = juce::jmin(b.getWidth(), b.getHeight()) * 0.5f;
@@ -108,7 +107,24 @@ namespace viator::gui::laf
                 }
             }
 
-            auto faceBase = juce::Colour(84, 83, 82);
+            const float rimW = juce::jlimit(1.5f, faceRadius * 0.12f, faceRadius * 0.075f);
+            auto outline = faceBounds.reduced(rimW * 0.15f);
+
+            {
+                const auto shadowBase = juce::Colours::black;
+                const float totalAlpha = 0.18f;
+                const float step = 0.2f;
+
+                for (int i = 0; i < 10; ++i)
+                {
+                    const float t = static_cast<float>(i) / 9.0f;
+                    const float a = totalAlpha * (1.0f - t) * (1.0f - t);
+                    g.setColour(shadowBase.withAlpha(a));
+                    g.drawEllipse(outline.translated(0.0f, (static_cast<float>(i) + 1.0f) * step), rimW);
+                }
+            }
+
+            auto faceBase = slider.findColour(juce::Slider::ColourIds::backgroundColourId);
             juce::ColourGradient faceGrad(
                 faceBase.brighter(0.08f),
                 faceBounds.getX() + faceBounds.getWidth() * 0.25f, faceBounds.getY() + faceBounds.getHeight() * 0.20f,
@@ -119,9 +135,9 @@ namespace viator::gui::laf
             g.setGradientFill(faceGrad);
             g.fillEllipse(faceBounds);
 
-            const float rimW = juce::jlimit(1.5f, faceRadius * 0.12f, faceRadius * 0.075f);
+
             g.setColour(trackColour.withAlpha(0.85f));
-            g.drawEllipse(faceBounds.reduced(rimW * 0.15f), rimW);
+            g.drawEllipse(outline, 1.0f);
 
             {
                 auto bevelBounds = faceBounds.reduced(rimW * 0.75f);
@@ -165,9 +181,6 @@ namespace viator::gui::laf
 
                 g.setColour(juce::Colours::white);
                 g.fillEllipse(dotBounds);
-
-                g.setColour(juce::Colour(0, 0, 0).withAlpha(0.5f));
-                g.drawEllipse(dotBounds, 1.0f);
             }
         }
     };
@@ -247,6 +260,108 @@ namespace viator::gui::laf
 
             g.setColour(label.findColour(juce::Label::outlineColourId));
             g.drawRoundedRectangle(label.getLocalBounds().toFloat().reduced(3.0f, 3.0f), 9.0f, 2.0f);
+        }
+    };
+
+    class BevelButtonLAF : public juce::LookAndFeel_V4 {
+    public:
+        float corner = 6.0f;
+
+        void drawButtonBackground(juce::Graphics &g,
+                                  juce::Button &button,
+                                  const juce::Colour & /*backgroundColour*/,
+                                  bool isMouseOverButton,
+                                  bool isButtonDown) override
+        {
+            auto bounds = button.getLocalBounds().toFloat().reduced(1.0f);
+
+            juce::Path shape;
+            shape.addRoundedRectangle(bounds, corner);
+
+            auto base = button.findColour(juce::TextButton::buttonColourId);
+            auto on = button.findColour(juce::TextButton::buttonOnColourId);
+            auto fillBase = button.getToggleState() ? on : base;
+
+            if (!button.isEnabled())
+                fillBase = fillBase.withMultipliedSaturation(0.15f).withMultipliedAlpha(0.55f);
+
+            if (isMouseOverButton)
+                fillBase = fillBase.brighter(0.06f);
+
+            if (isButtonDown)
+                fillBase = fillBase.darker(0.10f);
+
+            auto topCol = fillBase.brighter(isButtonDown ? 0.25f : 0.1f);
+            auto botCol = fillBase;
+
+            juce::ColourGradient fillGrad(topCol, bounds.getX(), bounds.getY(),
+                                          botCol, bounds.getX(), bounds.getBottom(), false);
+            g.setGradientFill(fillGrad);
+            g.fillPath(shape);
+
+            const auto w = bounds.getWidth();
+            const auto h = bounds.getHeight();
+            const auto r = 0.5f * juce::jmin(w, h);
+
+            const auto rimW = juce::jlimit(1.5f, r * 0.22f, r * 0.12f);
+            auto bevelBounds = bounds.reduced(rimW * 0.75f);
+
+            juce::Path ring;
+            ring.addRoundedRectangle(bevelBounds, juce::jmax(0.0f, corner - rimW * 0.75f));
+
+            const auto bw = juce::jlimit(1.0f, r * 0.10f, r * 0.055f);
+
+            juce::ColourGradient hi(
+                juce::Colours::white.withAlpha(0.22f),
+                bevelBounds.getX(), bevelBounds.getY(),
+                juce::Colours::transparentBlack,
+                bevelBounds.getCentreX(), bevelBounds.getCentreY(),
+                true
+            );
+            g.setGradientFill(hi);
+            g.strokePath(ring, juce::PathStrokeType(bw, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+            juce::ColourGradient lo(
+                juce::Colours::transparentBlack,
+                bevelBounds.getCentreX(), bevelBounds.getCentreY(),
+                juce::Colours::black.withAlpha(0.18f),
+                bevelBounds.getRight(), bevelBounds.getBottom(),
+                true
+            );
+            g.setGradientFill(lo);
+            g.strokePath(ring, juce::PathStrokeType(bw, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+            g.setColour(juce::Colours::black.withAlpha(button.isEnabled() ? 0.25f : 0.15f));
+            g.strokePath(shape, juce::PathStrokeType(1.0f));
+        }
+
+        void drawButtonText(juce::Graphics &g,
+                            juce::TextButton &button,
+                            bool /*isMouseOverButton*/,
+                            bool /*isButtonDown*/) override
+        {
+            auto font = getTextButtonFont(button, button.getHeight());
+            g.setFont(font);
+
+            auto textCol = button.findColour(button.getToggleState()
+                                                 ? juce::TextButton::textColourOnId
+                                                 : juce::TextButton::textColourOffId);
+
+            if (!button.isEnabled())
+                textCol = textCol.withMultipliedAlpha(0.5f);
+
+            auto r = button.getLocalBounds();
+
+            // tiny "lift" so text feels centered against shadow
+            r = r.translated(0, -1);
+
+            g.setColour(textCol);
+            g.drawFittedText(button.getButtonText(), r, juce::Justification::centred, 1);
+        }
+
+        juce::Font getTextButtonFont(juce::TextButton & /*button*/, int buttonHeight) override
+        {
+            return juce::Font((float) juce::jlimit(12, 22, (int) (buttonHeight * 0.45f)), juce::Font::bold);
         }
     };
 }

@@ -11,6 +11,12 @@ namespace viator::gui::editors
     {
         juce::ignoreUnused(processorRef);
 
+        const auto shadow_color = juce::Colours::black;
+        auto shadow = juce::DropShadow(shadow_color, 10, {0, 4});
+
+        m_drop_shadow = std::make_unique<juce::DropShadower>(shadow);
+        m_drop_shadow->setOwner(this);
+
         // SLIDERS
         for (auto &slider: m_io_sliders) {
             setSliderProps(slider);
@@ -64,45 +70,32 @@ namespace viator::gui::editors
         m_io_sliders[kOutput].setLookAndFeel(nullptr);
         m_preset_browser.setLookAndFeel(nullptr);
         m_oversampling_menu.setLookAndFeel(nullptr);
+
+        for (auto& button : m_buttons)
+        {
+            button.setLookAndFeel(nullptr);
+        }
     }
 
     //==============================================================================
     void BaseEditor::paint(juce::Graphics &g)
     {
-        // g.drawImageWithin(Images::bd_d(), 0, 0, getWidth(), getHeight(), juce::RectanglePlacement::stretchToFit);
-        //
-        // const auto bounds = getLocalBounds();
-        // const auto main_colour = m_comp_bg;
-        // constexpr auto contrast = 0.05;
-        // const auto alpha = JUCE_LIVE_CONSTANT(1.0f);
-        // const auto center_x = static_cast<float>(bounds.getCentreX());
-        // const auto center_y = static_cast<float>(bounds.getCentreY());
-        // const auto bottom = static_cast<float>(bounds.getBottom());
-        //
-        // const juce::ColourGradient gradient(
-        //     main_colour.brighter(contrast).withAlpha(alpha),center_x, center_y,
-        //     main_colour.darker(contrast).withAlpha(alpha), center_x, bottom, true
-        // );
-        //
-        // g.setGradientFill(gradient);
-        // g.fillRect(bounds);
+        g.fillAll(gui_utils::Colors::light_bg());
+        constexpr auto padding = 1;
 
-        g.fillAll(juce::Colour(44, 43, 42));
-
-
-        g.setColour(juce::Colour(74, 73, 71));
-        g.fillRect(2, 0, getWidth() - 2, juce::roundToInt(getHeight() * 0.05) + 12);
-        g.fillRect(2, juce::roundToInt(getHeight() * 0.91), getWidth() - 2, juce::roundToInt(getHeight() * 0.09));
+        g.setColour(gui_utils::Colors::medium_bg());
+        g.fillRect(padding, 0, getWidth() - padding, juce::roundToInt(getHeight() * 0.05) + 12);
+        g.fillRect(padding, juce::roundToInt(getHeight() * 0.91), getWidth() - padding, juce::roundToInt(getHeight() * 0.09));
 
         g.setColour(juce::Colour(0, 0, 0));
-        g.drawRect(0, 0, getWidth(), getHeight(), 2);
+        g.drawRect(0, 0, getWidth(), getHeight(), padding);
 
-        g.setColour(juce::Colour(21, 21, 21));
+        g.setColour(gui_utils::Colors::bright_bg());
         auto y = static_cast<float>(getHeight()) * 0.05f + 12.0f;
-        g.drawLine(0.0f, y, static_cast<float>(getWidth()), y, 2.0f);
+        g.drawLine(padding, y, static_cast<float>(getWidth()) - padding, y, padding);
 
         y = static_cast<float>(getHeight()) * 0.91f;
-        g.drawLine(0.0f, y, static_cast<float>(getWidth()), y, 2.0f);
+        g.drawLine(padding, y, static_cast<float>(getWidth()) - padding, y, padding);
     }
 
     void BaseEditor::resized()
@@ -165,10 +158,9 @@ namespace viator::gui::editors
         button.setButtonText(name);
         button.setColour(juce::ComboBox::ColourIds::outlineColourId,
                          juce::Colours::transparentBlack);
-        button.setColour(juce::TextButton::ColourIds::buttonColourId,
-                         m_widget_bg);
-        button.setColour(juce::TextButton::ColourIds::buttonOnColourId,
-                         m_widget_bg);
+        button.setColour(juce::TextButton::ColourIds::buttonColourId, gui_utils::Colors::light_bg());
+        button.setColour(juce::TextButton::ColourIds::buttonOnColourId, gui_utils::Colors::bright_bg().brighter(0.15f));
+        button.setLookAndFeel(&m_button_laf);
         addAndMakeVisible(button);
     }
 }

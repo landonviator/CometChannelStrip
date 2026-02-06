@@ -61,7 +61,7 @@ AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
 //==============================================================================
 void AudioPluginAudioProcessorEditor::paint(juce::Graphics &g)
 {
-    g.fillAll(juce::Colour(31, 32, 34));
+    g.fillAll(viator::gui_utils::Colors::darkest_bg());
 
     g.setColour(juce::Colours::black);
     g.drawRect(0, 0, getWidth(), getHeight(), 3);

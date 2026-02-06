@@ -56,7 +56,7 @@ namespace viator::gui::editors
     //==============================================================================
     void LVPultecEQEditor::paint(juce::Graphics &g)
     {
-        setBackgroundColor(juce::Colour(0, 108, 133));
+        //setBackgroundColor(juce::Colour(0, 108, 133));
         BaseEditor::paint(g);
         updateLabels();
     }
@@ -103,6 +103,7 @@ namespace viator::gui::editors
         slider.setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, juce::Colour(215, 215, 215).withAlpha(0.85f));
         slider.setColour(juce::Slider::ColourIds::trackColourId, juce::Colour(0, 0, 0));
         slider.setColour(juce::Slider::ColourIds::rotarySliderFillColourId, juce::Colour(211, 218, 217));
+        slider.setColour(juce::Slider::ColourIds::backgroundColourId, gui_utils::Colors::bright_bg());
         slider.setLookAndFeel(&m_dial_laf);
 
         addAndMakeVisible(slider);

@@ -66,5 +66,9 @@ namespace viator::gui::editors
 
         juce::Colour m_comp_bg = juce::Colours::blue;
         juce::Colour m_widget_bg = juce::Colours::black.withAlpha(0.3f);
+
+        std::unique_ptr<juce::DropShadower> m_drop_shadow;
+
+        laf::BevelButtonLAF m_button_laf;
     };
 }
