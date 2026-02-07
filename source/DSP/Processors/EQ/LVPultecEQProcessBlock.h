@@ -27,7 +27,7 @@ namespace LVPultecEQParameters
     inline const juce::String highAttenName = "High Atten";
 
     inline const juce::String highAttenSelID = "highAttenSelID";
-    inline const juce::String highAttenSelName = "High Atten Sel";
+    inline const juce::String highAttenSelName = "Sel";
 
     inline const juce::String lowFreqID = "lowFreqID";
     inline const juce::String lowFreqName = "Low Freq";

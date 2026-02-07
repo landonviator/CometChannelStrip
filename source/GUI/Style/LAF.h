@@ -5,10 +5,82 @@
 #pragma once
 #include <juce_gui_basics/juce_gui_basics.h>
 #include "Fonts.h"
+#include "Colors.h"
 
 namespace viator::gui::laf
 {
-    class DialLAF final : public juce::LookAndFeel_V4 {
+    class KnobUtils
+    {
+    public:
+        static void draw_ticks(juce::Graphics &g, const juce::Slider &slider, const float radiusMult = 0.05f)
+        {
+            const auto bounds = slider.getLocalBounds().toFloat().reduced(static_cast<float>(slider.getWidth()) * 0.1f);
+            const auto center = bounds.getCentre();
+            const float radius = juce::jmin(bounds.getWidth(), bounds.getHeight()) / 2.0f - 10.0f;
+
+            constexpr int numSteps = 11;
+            constexpr float startAngle = juce::MathConstants<float>::pi * 1.25f;
+            constexpr float endAngle = juce::MathConstants<float>::pi * 2.75f;
+
+            g.setColour(juce::Colours::whitesmoke);
+            constexpr auto font_size = 12.0f;
+            const auto font = gui_utils::Fonts::bold(font_size);
+            g.setFont(font);
+
+            if (slider.getName() != "Type") {
+                for (int i = 0; i < numSteps; ++i) {
+                    const float t = static_cast<float>(i) / (numSteps - 1);
+                    const auto value = static_cast<float>(slider.getNormalisableRange().convertFrom0to1(t));
+                    const auto angle = juce::jmap(t, 0.0f, 1.0f, startAngle, endAngle) - juce::MathConstants<
+                                           float>::halfPi;
+
+                    const float labelRadius = radius + static_cast<float>(slider.getHeight()) * 0.1f;
+                    const float x = center.x + std::cos(angle) * labelRadius;
+                    const float y = center.y + std::sin(angle) * labelRadius;
+
+                    juce::String label;
+                    if (std::abs(value) >= 1000.0f) {
+                        const int valueInK = static_cast<int>(std::round(value / 1000.0f));
+                        label = juce::String(valueInK) + "k";
+                    } else {
+                        label = juce::String(static_cast<int>(std::round(std::abs(value))));
+                    }
+
+                    label.append(slider.getTextValueSuffix(), 32);
+
+                    const float textWidth = g.getCurrentFont().getStringWidth(label);
+                    const float textHeight = g.getCurrentFont().getAscent();
+
+                    if (i == 0 || i == 5 || i == 10) {
+                        juce::Rectangle<float> textBounds(x - textWidth / 2.0f, y - textHeight / 2.0f, textWidth,
+                                                          textHeight);
+                        g.drawText(label, textBounds, juce::Justification::centred);
+                    }
+                }
+            }
+
+            // Draw tick marks
+            for (int i = 0; i < numSteps; ++i) {
+                const float t = static_cast<float>(i) / (numSteps - 1);
+                const auto angle = juce::jmap(t, 0.0f, 1.0f, startAngle, endAngle) - juce::MathConstants<float>::halfPi;
+
+                const float innerRadius = radius - slider.getHeight() * 0.04f;
+                const float outerRadius = radius + static_cast<float>(slider.getHeight()) * radiusMult * 0.5f;
+
+                const juce::Point<float> p1(center.x + std::cos(angle) * innerRadius,
+                                            center.y + std::sin(angle) * innerRadius);
+                const juce::Point<float> p2(center.x + std::cos(angle) * outerRadius,
+                                            center.y + std::sin(angle) * outerRadius);
+
+                g.drawLine({p1, p2}, 1.0f);
+            }
+
+            g.setColour(juce::Colours::white);
+        }
+    };
+
+    class DialLAF final : public juce::LookAndFeel_V4
+    {
     public:
         enum class FillMode { UnipolarMinToValue, BipolarZeroToValue, None };
 
@@ -16,7 +88,9 @@ namespace viator::gui::laf
                               const float sliderPos, const float rotaryStartAngle, const float rotaryEndAngle,
                               juce::Slider &slider) override
         {
-            auto b = juce::Rectangle<float>((float) x, (float) y, (float) width, (float) height).reduced(2.0f);
+            KnobUtils::draw_ticks(g, slider);
+
+            auto b = juce::Rectangle<float>((float) x, (float) y, (float) width, (float) height).reduced(width * 0.18f);
             auto centre = b.getCentre();
             auto r = juce::jmin(b.getWidth(), b.getHeight()) * 0.5f;
 
@@ -28,8 +102,7 @@ namespace viator::gui::laf
                 const auto minV = (float) slider.getRange().getStart();
                 const auto maxV = (float) slider.getRange().getEnd();
 
-                if (slider.getProperties().contains("fillMode"))
-                {
+                if (slider.getProperties().contains("fillMode")) {
                     const int m = (int) slider.getProperties()["fillMode"];
                     if (m == 1) return FillMode::BipolarZeroToValue;
                     if (m == 2) return FillMode::None;
@@ -57,15 +130,6 @@ namespace viator::gui::laf
                 return rotaryStartAngle + t * (rotaryEndAngle - rotaryStartAngle);
             };
 
-            auto strokeArc = [&](float a0, float a1, float radius, float thickness, juce::Colour c)
-            {
-                if (a1 < a0) std::swap(a0, a1);
-                juce::Path p;
-                p.addCentredArc(centre.x, centre.y, radius, radius, 0.0f, a0, a1, true);
-                g.setColour(c);
-                g.strokePath(p, juce::PathStrokeType(thickness, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
-            };
-
             const juce::Colour defaultTrack = juce::Colours::black.brighter(0.1f);
             const auto defaultValue = juce::Colour(211, 218, 217);
 
@@ -75,7 +139,7 @@ namespace viator::gui::laf
             const auto trackColour = slider.isColourSpecified(trackId) ? slider.findColour(trackId) : defaultTrack;
             const auto valueColour = slider.isColourSpecified(valueId) ? slider.findColour(valueId) : defaultValue;
 
-            const float trackThickness = juce::jlimit(3.0f, r * 0.22f, r * 0.14f);
+            const float trackThickness = r * 0.14f;
             const float trackRadius = r - trackThickness * 0.5f;
 
             const float faceRadius = trackRadius - trackThickness * 0.95f;
@@ -89,34 +153,13 @@ namespace viator::gui::laf
 
             const float valueAngle = angleForValue(v);
 
-            strokeArc(start, end, trackRadius, trackThickness, trackColour.withAlpha(0.75f));
-
-            if (mode != FillMode::None)
-            {
-                float anchorV = minV;
-                if (mode == FillMode::BipolarZeroToValue)
-                    anchorV = 0.0f;
-
-                anchorV = juce::jlimit(minV, maxV, anchorV);
-
-                const float anchorAngle = angleForValue(anchorV);
-
-                if (const bool atAnchor = std::abs(v - anchorV) <= 1.0e-6f; !atAnchor)
-                {
-                    strokeArc(anchorAngle, valueAngle, trackRadius, trackThickness, valueColour);
-                }
-            }
-
-            const float rimW = juce::jlimit(1.5f, faceRadius * 0.12f, faceRadius * 0.075f);
-            auto outline = faceBounds.reduced(rimW * 0.15f);
-
-            {
+            const float rimW = faceRadius * 0.075f;
+            auto outline = faceBounds.reduced(rimW * 0.15f); {
                 const auto shadowBase = juce::Colours::black;
                 const float totalAlpha = 0.18f;
                 const float step = 0.2f;
 
-                for (int i = 0; i < 10; ++i)
-                {
+                for (int i = 0; i < 10; ++i) {
                     const float t = static_cast<float>(i) / 9.0f;
                     const float a = totalAlpha * (1.0f - t) * (1.0f - t);
                     g.setColour(shadowBase.withAlpha(a));
@@ -132,19 +175,18 @@ namespace viator::gui::laf
                 faceBounds.getRight() - faceBounds.getWidth() * 0.15f, faceBounds.getBottom() - faceBounds.getHeight() * 0.10f,
                 true
             );
+
             g.setGradientFill(faceGrad);
             g.fillEllipse(faceBounds);
 
-
             g.setColour(trackColour.withAlpha(0.85f));
-            g.drawEllipse(outline, 1.0f);
-
+            //g.drawEllipse(outline, 1.0f);
             {
                 auto bevelBounds = faceBounds.reduced(rimW * 0.75f);
                 juce::Path ring;
                 ring.addEllipse(bevelBounds);
 
-                auto bw = juce::jlimit(1.0f, faceRadius * 0.10f, faceRadius * 0.055f);
+                auto bw = faceRadius * 0.055f;
 
                 juce::ColourGradient hi(
                     juce::Colours::white.withAlpha(0.22f),
@@ -153,6 +195,7 @@ namespace viator::gui::laf
                     bevelBounds.getCentreX(), bevelBounds.getCentreY(),
                     true
                 );
+
                 g.setGradientFill(hi);
                 g.strokePath(ring, juce::PathStrokeType(bw, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
 
@@ -163,11 +206,10 @@ namespace viator::gui::laf
                     bevelBounds.getRight(), bevelBounds.getBottom(),
                     true
                 );
+
                 g.setGradientFill(lo);
                 g.strokePath(ring, juce::PathStrokeType(bw, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
-            }
-
-            {
+            } {
                 const float dotAngle = valueAngle - juce::MathConstants<float>::halfPi;
                 const float dotDist = faceRadius * 0.62f;
                 const float dotR = faceRadius * 0.07f;
@@ -179,13 +221,23 @@ namespace viator::gui::laf
 
                 auto dotBounds = juce::Rectangle<float>(dotR * 2.0f, dotR * 2.0f).withCentre(p);
 
-                g.setColour(juce::Colours::white);
+                g.setColour(trackColour);
                 g.fillEllipse(dotBounds);
             }
+
+            constexpr auto font_size = 12.0f;
+            const auto font = gui_utils::Fonts::bold(font_size);
+            //const auto is_over = slider.isMouseOverOrDragging();
+            //const auto text = is_over ? juce::String(slider.getValue(), 2) : slider.getName();
+            const auto text = slider.getName();
+            g.setColour(juce::Colours::whitesmoke);
+            g.setFont(font);
+            g.drawText(text, 0, height - font_size, width, font_size, juce::Justification::centredBottom);
         }
     };
 
-    class MacroLAF final : public juce::LookAndFeel_V4 {
+    class MacroLAF final : public juce::LookAndFeel_V4
+    {
     public:
         explicit MacroLAF(const int num_decimal_places)
         {
@@ -218,8 +270,7 @@ namespace viator::gui::laf
             g.setColour(outline);
             g.strokePath(backgroundArc, juce::PathStrokeType(lineW, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
 
-            if (slider.isEnabled())
-            {
+            if (slider.isEnabled()) {
                 juce::Path valueArc;
                 valueArc.addCentredArc(bounds.getCentreX(),
                                        bounds.getCentreY(),
@@ -235,8 +286,9 @@ namespace viator::gui::laf
             }
 
             auto thumbWidth = lineW * 2.0f;
-            juce::Point<float> thumbPoint(bounds.getCentreX() + arcRadius * std::cos(toAngle - juce::MathConstants<float>::halfPi),
-                                          bounds.getCentreY() + arcRadius * std::sin(toAngle - juce::MathConstants<float>::halfPi));
+            juce::Point<float> thumbPoint(
+                bounds.getCentreX() + arcRadius * std::cos(toAngle - juce::MathConstants<float>::halfPi),
+                bounds.getCentreY() + arcRadius * std::sin(toAngle - juce::MathConstants<float>::halfPi));
 
             g.setColour(slider.findColour(juce::Slider::thumbColourId));
             g.fillEllipse(juce::Rectangle<float>(thumbWidth, thumbWidth).withCentre(thumbPoint));
@@ -251,7 +303,8 @@ namespace viator::gui::laf
         int m_num_decimals{0};
     };
 
-    class Billboard final : public juce::LookAndFeel_V4 {
+    class Billboard final : public juce::LookAndFeel_V4
+    {
     public:
         void drawLabel(juce::Graphics &g, juce::Label &label) override
         {
@@ -263,76 +316,29 @@ namespace viator::gui::laf
         }
     };
 
-    class BevelButtonLAF : public juce::LookAndFeel_V4 {
+    class BevelButtonLAF : public juce::LookAndFeel_V4
+    {
     public:
-        float corner = 6.0f;
-
         void drawButtonBackground(juce::Graphics &g,
                                   juce::Button &button,
-                                  const juce::Colour & /*backgroundColour*/,
-                                  bool isMouseOverButton,
-                                  bool isButtonDown) override
+                                  const juce::Colour &backgroundColour,
+                                  bool shouldDrawButtonAsHighlighted,
+                                  bool shouldDrawButtonAsDown) override
         {
-            auto bounds = button.getLocalBounds().toFloat().reduced(1.0f);
+            auto cornerSize = 3.0f;
+            auto bounds = button.getLocalBounds().toFloat();
 
-            juce::Path shape;
-            shape.addRoundedRectangle(bounds, corner);
+            auto baseColour = backgroundColour.withMultipliedSaturation(button.hasKeyboardFocus(true) ? 1.3f : 0.9f)
+                    .withMultipliedAlpha(button.isEnabled() ? 1.0f : 0.5f);
 
-            auto base = button.findColour(juce::TextButton::buttonColourId);
-            auto on = button.findColour(juce::TextButton::buttonOnColourId);
-            auto fillBase = button.getToggleState() ? on : base;
+            if (shouldDrawButtonAsDown || shouldDrawButtonAsHighlighted)
+                baseColour = baseColour.contrasting(shouldDrawButtonAsDown ? 0.2f : 0.05f);
 
-            if (!button.isEnabled())
-                fillBase = fillBase.withMultipliedSaturation(0.15f).withMultipliedAlpha(0.55f);
+            g.setColour(baseColour);
+            g.fillRoundedRectangle(bounds, cornerSize);
 
-            if (isMouseOverButton)
-                fillBase = fillBase.brighter(0.06f);
-
-            if (isButtonDown)
-                fillBase = fillBase.darker(0.10f);
-
-            auto topCol = fillBase.brighter(isButtonDown ? 0.25f : 0.1f);
-            auto botCol = fillBase;
-
-            juce::ColourGradient fillGrad(topCol, bounds.getX(), bounds.getY(),
-                                          botCol, bounds.getX(), bounds.getBottom(), false);
-            g.setGradientFill(fillGrad);
-            g.fillPath(shape);
-
-            const auto w = bounds.getWidth();
-            const auto h = bounds.getHeight();
-            const auto r = 0.5f * juce::jmin(w, h);
-
-            const auto rimW = juce::jlimit(1.5f, r * 0.22f, r * 0.12f);
-            auto bevelBounds = bounds.reduced(rimW * 0.75f);
-
-            juce::Path ring;
-            ring.addRoundedRectangle(bevelBounds, juce::jmax(0.0f, corner - rimW * 0.75f));
-
-            const auto bw = juce::jlimit(1.0f, r * 0.10f, r * 0.055f);
-
-            juce::ColourGradient hi(
-                juce::Colours::white.withAlpha(0.22f),
-                bevelBounds.getX(), bevelBounds.getY(),
-                juce::Colours::transparentBlack,
-                bevelBounds.getCentreX(), bevelBounds.getCentreY(),
-                true
-            );
-            g.setGradientFill(hi);
-            g.strokePath(ring, juce::PathStrokeType(bw, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
-
-            juce::ColourGradient lo(
-                juce::Colours::transparentBlack,
-                bevelBounds.getCentreX(), bevelBounds.getCentreY(),
-                juce::Colours::black.withAlpha(0.18f),
-                bevelBounds.getRight(), bevelBounds.getBottom(),
-                true
-            );
-            g.setGradientFill(lo);
-            g.strokePath(ring, juce::PathStrokeType(bw, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
-
-            g.setColour(juce::Colours::black.withAlpha(button.isEnabled() ? 0.25f : 0.15f));
-            g.strokePath(shape, juce::PathStrokeType(1.0f));
+            g.setColour(button.findColour(juce::ComboBox::outlineColourId));
+            g.drawRoundedRectangle(bounds, cornerSize, 1.0f);
         }
 
         void drawButtonText(juce::Graphics &g,
@@ -361,7 +367,7 @@ namespace viator::gui::laf
 
         juce::Font getTextButtonFont(juce::TextButton & /*button*/, int buttonHeight) override
         {
-            return juce::Font((float) juce::jlimit(12, 22, (int) (buttonHeight * 0.45f)), juce::Font::bold);
+            return juce::Font((float) (int) (buttonHeight * 0.45f), juce::Font::bold);
         }
     };
 }

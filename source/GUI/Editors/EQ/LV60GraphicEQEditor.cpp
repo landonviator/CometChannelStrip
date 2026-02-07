@@ -87,7 +87,7 @@ namespace viator::gui::editors
     void LV60GraphicEQEditor::resized()
     {
         auto x = juce::roundToInt(getWidth() * 0.2);
-        auto y = juce::roundToInt(getHeight() * 0.12);
+        auto y = juce::roundToInt(getHeight() * 0.07);
         auto width = juce::roundToInt(getWidth() * 0.6);
         const auto height = getHeight() / (num_sliders + 2);
         auto font_size = static_cast<float>(getWidth()) * 0.05f;
@@ -114,7 +114,7 @@ namespace viator::gui::editors
         }
 
         width = getWidth() / 5;
-        y = juce::roundToInt(getHeight() * 0.8);
+        y = juce::roundToInt(getHeight() * 0.75);
         x = juce::roundToInt(getWidth() * 0.198);
         const auto label_height = height / 2;
         const auto filter_size = juce::roundToInt(width * 0.85);

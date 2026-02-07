@@ -56,41 +56,28 @@ namespace viator::gui::editors
     //==============================================================================
     void LVPultecEQEditor::paint(juce::Graphics &g)
     {
-        //setBackgroundColor(juce::Colour(0, 108, 133));
+        setBackgroundColor(juce::Colour(3, 102, 155));
         BaseEditor::paint(g);
-        updateLabels();
     }
 
     void LVPultecEQEditor::resized()
     {
-        const auto width = juce::roundToInt(getWidth() * 0.25);
+        const auto width = juce::roundToInt(getWidth() * 0.34);
         auto x = juce::roundToInt(getWidth() * 0.05);
-        auto y = juce::roundToInt(getHeight() - width * 2.0);
-        const auto padding_y = juce::roundToInt(getWidth() * 0.09);
-        const auto padding_x = juce::roundToInt(width * 0.16);
-        const auto font_size = static_cast<float>(getWidth()) * 0.035f;
+        auto y = getHeight() - juce::roundToInt(width * 1.5);
 
         for (int i = 0; i < 4; ++i)
         {
             m_main_sliders[i].setBounds(x, y, width, width);
-            y -= width + padding_y;
+            y -= width;
         }
 
-        y = juce::roundToInt(getHeight() - width * 2.0);
+        y = getHeight() - juce::roundToInt(width * 1.5);
         x = getWidth() - x - width;
         for (int i = 4; i < 8; ++i)
         {
             m_main_sliders[i].setBounds(x, y, width, width);
-            y -= width + padding_y;
-        }
-
-        const auto height = getHeight() / (num_sliders + 2);
-        const auto label_height = height / 2;
-
-        for (int i = 0; i < m_main_sliders.size(); ++i)
-        {
-            m_main_labels[i].setBounds(m_main_sliders[i].getX(), m_main_sliders[i].getBottom(), width, label_height);
-            m_main_labels[i].setFont(viator::gui_utils::Fonts::regular(font_size));
+            y -= width;
         }
 
         BaseEditor::resized();
@@ -101,7 +88,7 @@ namespace viator::gui::editors
         slider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
         slider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
         slider.setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, juce::Colour(215, 215, 215).withAlpha(0.85f));
-        slider.setColour(juce::Slider::ColourIds::trackColourId, juce::Colour(0, 0, 0));
+        slider.setColour(juce::Slider::ColourIds::trackColourId, juce::Colours::whitesmoke);
         slider.setColour(juce::Slider::ColourIds::rotarySliderFillColourId, juce::Colour(211, 218, 217));
         slider.setColour(juce::Slider::ColourIds::backgroundColourId, gui_utils::Colors::bright_bg());
         slider.setLookAndFeel(&m_dial_laf);

@@ -3,6 +3,7 @@
 //
 
 #include "BaseEditor.h"
+#include "GUI/Style/Images.h"
 
 namespace viator::gui::editors
 {
@@ -71,8 +72,7 @@ namespace viator::gui::editors
         m_preset_browser.setLookAndFeel(nullptr);
         m_oversampling_menu.setLookAndFeel(nullptr);
 
-        for (auto& button : m_buttons)
-        {
+        for (auto &button: m_buttons) {
             button.setLookAndFeel(nullptr);
         }
     }
@@ -80,7 +80,23 @@ namespace viator::gui::editors
     //==============================================================================
     void BaseEditor::paint(juce::Graphics &g)
     {
-        g.fillAll(gui_utils::Colors::light_bg());
+        const auto bounds = getLocalBounds();
+
+        juce::ColourGradient faceGrad(
+            m_comp_bg.brighter(0.1f),
+            bounds.getX() + bounds.getWidth() * 0.25f, bounds.getY() + bounds.getHeight() * 0.20f,
+            m_comp_bg.darker(0.15f),
+            bounds.getRight() - bounds.getWidth() * 0.15f, bounds.getBottom() - bounds.getHeight() * 0.10f,
+            true
+        );
+
+        g.setGradientFill(faceGrad);
+        g.fillRect(bounds);
+
+        g.setOpacity(0.1f);
+        g.drawImageWithin(Images::texture(), 0, 0, getWidth(), getHeight(), juce::RectanglePlacement::stretchToFit);
+        g.setOpacity(1.0f);
+
         constexpr auto padding = 1;
 
         g.setColour(gui_utils::Colors::medium_bg());
@@ -113,12 +129,13 @@ namespace viator::gui::editors
         m_io_sliders[kOutput].setBounds(x, y, width, height);
         m_io_sliders[kOutput].setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
 
+        constexpr auto padding = 2;
+
         // MENUS
-        x = juce::roundToInt(getWidth() * 0.025);
-        width = juce::roundToInt(getWidth() * 0.3);
+        x = 4;
+        width = juce::roundToInt(getWidth() * 0.335);
         height = juce::roundToInt(getHeight() * 0.05);
-        y = 6;
-        const auto padding = juce::roundToInt(getWidth() * 0.021);
+        y = juce::roundToInt(getHeight() * 0.012);
         m_preset_browser.setBounds(x, y, width, height);
         x += width + padding;
         width = juce::roundToInt(width * 0.75);
@@ -146,9 +163,8 @@ namespace viator::gui::editors
         box.addItemList(items, 1);
         box.setLookAndFeel(&m_menu_laf);
         box.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
-        box.setColour(juce::ComboBox::ColourIds::backgroundColourId, m_widget_bg);
-        box.getLookAndFeel().setColour(juce::PopupMenu::ColourIds::backgroundColourId,
-                                       viator::gui_utils::Colors::editor_minor_bg_color());
+        box.setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::whitesmoke.withAlpha(0.05f));
+        box.getLookAndFeel().setColour(juce::PopupMenu::ColourIds::backgroundColourId, gui_utils::Colors::light_bg());
         addAndMakeVisible(box);
         box.setSelectedId(1);
     }
@@ -158,8 +174,8 @@ namespace viator::gui::editors
         button.setButtonText(name);
         button.setColour(juce::ComboBox::ColourIds::outlineColourId,
                          juce::Colours::transparentBlack);
-        button.setColour(juce::TextButton::ColourIds::buttonColourId, gui_utils::Colors::light_bg());
-        button.setColour(juce::TextButton::ColourIds::buttonOnColourId, gui_utils::Colors::bright_bg().brighter(0.15f));
+        button.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::whitesmoke.withAlpha(0.05f));
+        button.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::whitesmoke.withAlpha(0.15f));
         button.setLookAndFeel(&m_button_laf);
         addAndMakeVisible(button);
     }

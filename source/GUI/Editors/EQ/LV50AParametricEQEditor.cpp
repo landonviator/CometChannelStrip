@@ -18,6 +18,20 @@ namespace viator::gui::editors
             getSliders().push_back(&m_main_sliders[i]);
         }
 
+        m_main_sliders[kCutoff1].setColour(juce::Slider::ColourIds::backgroundColourId, juce::Colour(60, 120, 200));
+        m_main_sliders[kCutoff2].setColour(juce::Slider::ColourIds::backgroundColourId, juce::Colour(60, 120, 200));
+        m_main_sliders[kCutoff3].setColour(juce::Slider::ColourIds::backgroundColourId, juce::Colour(60, 120, 200));
+        m_main_sliders[kCutoff4].setColour(juce::Slider::ColourIds::backgroundColourId, juce::Colour(60, 120, 200));
+
+        m_main_sliders[kQ4].setColour(juce::Slider::ColourIds::backgroundColourId, juce::Colour(247, 55, 79));
+        m_main_sliders[kQ1].setColour(juce::Slider::ColourIds::backgroundColourId, juce::Colour(247, 55, 79));
+        m_main_sliders[kQ2].setColour(juce::Slider::ColourIds::backgroundColourId, juce::Colour(247, 55, 79));
+        m_main_sliders[kQ3].setColour(juce::Slider::ColourIds::backgroundColourId, juce::Colour(247, 55, 79));
+
+        m_main_sliders[kLP].setColour(juce::Slider::ColourIds::backgroundColourId, juce::Colour(157, 178, 191));
+        m_main_sliders[kHP].setColour(juce::Slider::ColourIds::backgroundColourId, juce::Colour(157, 178, 191));
+        m_main_sliders[kDrive].setColour(juce::Slider::ColourIds::backgroundColourId, juce::Colour(157, 178, 191));
+
         for (auto &label: m_main_labels)
         {
             setLabelProps(label);
@@ -95,48 +109,36 @@ namespace viator::gui::editors
     //==============================================================================
     void LV50AParametricEQEditor::paint(juce::Graphics &g)
     {
-        setBackgroundColor(juce::Colour(19, 36, 64));
+        setBackgroundColor(juce::Colour(14, 15, 16));
         BaseEditor::paint(g);
-        updateLabels();
     }
 
     void LV50AParametricEQEditor::resized()
     {
-        auto x = juce::roundToInt(getWidth() * 0.05);
+        auto x = 0;
         auto y = juce::roundToInt(getHeight() * 0.12);
-        auto width = getWidth() / 5;
-        const auto padding_y = juce::roundToInt(width * 0.65);
-        const auto padding_x = juce::roundToInt(width * 0.16);
-        const auto height = getHeight() / (num_sliders + 2);
-        const auto font_size = static_cast<float>(getWidth()) * 0.035f;
+        auto width = juce::roundToInt(getWidth() * 0.25);
 
         for (int i = 0; i < 4; ++i)
         {
             y = juce::roundToInt(getHeight() * 0.12);
             m_main_sliders[i].setBounds(x, y, width, width);
-            y += width + padding_y;
+            y += width + width / 2;
             m_main_sliders[i + 8].setBounds(x, y, width, width);
-            y += width + padding_y;
+            y += width + width / 4;
             m_main_sliders[i + 4].setBounds(x, y, width, width);
-            x += width + padding_x;
+            x += width;
         }
 
-        width = getWidth() / 5;
-        y = juce::roundToInt(getHeight() * 0.8);
-        x = juce::roundToInt(getWidth() * 0.198);
-        const auto label_height = height / 2;
+        width = juce::roundToInt(getWidth() * 0.335);
+        y = juce::roundToInt(getHeight() * 0.7);
+        x = 0;
         const auto filter_size = juce::roundToInt(width * 0.85);
         m_main_sliders[kHP].setBounds(x, y, filter_size, filter_size);
         x += width;
         m_main_sliders[kDrive].setBounds(x, y, width, width);
         x += width + (width - filter_size);
         m_main_sliders[kLP].setBounds(x, y, filter_size, filter_size);
-
-        for (int i = 0; i < m_main_sliders.size(); ++i)
-        {
-            m_main_labels[i].setBounds(m_main_sliders[i].getX(), m_main_sliders[i].getBottom(), width, label_height);
-            m_main_labels[i].setFont(viator::gui_utils::Fonts::regular(font_size));
-        }
 
         BaseEditor::resized();
     }
@@ -146,7 +148,8 @@ namespace viator::gui::editors
         slider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
         slider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
         slider.setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, juce::Colour(215, 215, 215).withAlpha(0.85f));
-        slider.setColour(juce::Slider::ColourIds::rotarySliderFillColourId, juce::Colour(211, 218, 217));
+        slider.setColour(juce::Slider::ColourIds::trackColourId, juce::Colours::whitesmoke);
+        slider.setColour(juce::Slider::ColourIds::backgroundColourId, juce::Colour(226, 223, 208).darker(0.15f));
         slider.setLookAndFeel(&m_dial_laf);
 
         addAndMakeVisible(slider);

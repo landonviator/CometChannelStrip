@@ -54,7 +54,8 @@ namespace viator::gui::views
 
     void EditorRack::paint(juce::Graphics &g)
     {
-        g.fillAll(juce::Colours::black.brighter(0.15f));
+        g.setColour(juce::Colours::whitesmoke.withAlpha(0.5f));
+        g.drawRect(getLocalBounds(), 1.0f);
     }
 
     void EditorRack::resized()

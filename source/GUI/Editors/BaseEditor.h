@@ -64,7 +64,7 @@ namespace viator::gui::editors
 
         void drawHeaderAndFooter(juce::Graphics &g);
 
-        juce::Colour m_comp_bg = juce::Colours::blue;
+        juce::Colour m_comp_bg = gui_utils::Colors::light_bg();
         juce::Colour m_widget_bg = juce::Colours::black.withAlpha(0.3f);
 
         std::unique_ptr<juce::DropShadower> m_drop_shadow;
