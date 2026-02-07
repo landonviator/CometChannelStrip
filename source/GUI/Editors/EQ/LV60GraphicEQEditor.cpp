@@ -80,7 +80,6 @@ namespace viator::gui::editors
 //==============================================================================
     void LV60GraphicEQEditor::paint(juce::Graphics &g)
     {
-        setBackgroundColor(juce::Colour(41, 43, 45));
         BaseEditor::paint(g);
     }
 

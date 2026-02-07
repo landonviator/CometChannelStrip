@@ -6,7 +6,9 @@
 
 #include "../../DSP/Processors/BaseProcessor.h"
 #include "../Widgets/BaseSlider.h"
-#include "../Style/LAF.h"
+#include "../Style/DialLAF.h"
+#include "../Style/MacroLAF.h"
+#include "../Style/ButtonLAF.h"
 #include "../Style/MenuLAF.h"
 #include "../Style/Colors.h"
 #include "../../Globals/Globals.h"
@@ -48,7 +50,7 @@ namespace viator::gui::editors
         std::vector<widgets::BaseSlider *> m_sliders;
 
         std::array<juce::Slider, 2> m_io_sliders;
-        laf::MacroLAF m_io_laf {1};
+        viator::laf::MacroLAF m_io_laf {1};
 
         virtual void setSliderProps(juce::Slider &slider);
 
@@ -69,6 +71,6 @@ namespace viator::gui::editors
 
         std::unique_ptr<juce::DropShadower> m_drop_shadow;
 
-        laf::BevelButtonLAF m_button_laf;
+        viator::laf::ButtonLAF m_button_laf;
     };
 }

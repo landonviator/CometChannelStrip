@@ -46,7 +46,7 @@ namespace viator::gui::editors
 
         void updateLabels();
 
-        viator::gui::laf::DialLAF m_dial_laf;
+        viator::laf::DialLAF m_dial_laf;
         viator::gui::laf::MenuLAF m_menu_laf;
     };
 }

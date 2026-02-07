@@ -31,7 +31,7 @@ public:
         p.addRoundedRectangle(r, corner_radius);
 
         juce::DropShadow ds(shadow_colour, shadow_radius, shadow_offset);
-        ds.drawForPath(g, p);
+        //ds.drawForPath(g, p);
 
         g.setColour(fill_colour);
         g.fillPath(p);
@@ -50,7 +50,7 @@ private:
     int shadow_radius = 5;
     juce::Point<int> shadow_offset { 0, 2 };
 
-    juce::Colour fill_colour   = viator::gui_utils::Colors::darkest_bg();
+    juce::Colour fill_colour   = viator::gui_utils::Colors::main_bg();
     juce::Colour outline_colour = viator::gui_utils::Colors::light_bg();
     juce::Colour shadow_colour  = juce::Colour(0, 0, 0);
 };

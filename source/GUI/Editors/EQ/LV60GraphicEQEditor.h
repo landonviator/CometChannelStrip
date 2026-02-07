@@ -96,7 +96,7 @@ namespace viator::gui::editors
             "16 kHz", "8 kHz", "4 kHz", "2 kHz", "1 kHz", "500 Hz", "250 Hz", "125 Hz", "63 Hz", "31 Hz"
         };
 
-        viator::gui::laf::DialLAF m_dial_laf;
+        viator::laf::DialLAF m_dial_laf;
         viator::gui::laf::MenuLAF m_menu_laf;
         SliderLAF m_slider_laf;
     };

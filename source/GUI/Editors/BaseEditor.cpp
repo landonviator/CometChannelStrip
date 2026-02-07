@@ -15,8 +15,8 @@ namespace viator::gui::editors
         const auto shadow_color = juce::Colours::black;
         auto shadow = juce::DropShadow(shadow_color, 10, {0, 4});
 
-        m_drop_shadow = std::make_unique<juce::DropShadower>(shadow);
-        m_drop_shadow->setOwner(this);
+        //m_drop_shadow = std::make_unique<juce::DropShadower>(shadow);
+       // m_drop_shadow->setOwner(this);
 
         // SLIDERS
         for (auto &slider: m_io_sliders) {
@@ -82,31 +82,27 @@ namespace viator::gui::editors
     {
         const auto bounds = getLocalBounds();
 
-        juce::ColourGradient faceGrad(
-            m_comp_bg.brighter(0.1f),
-            bounds.getX() + bounds.getWidth() * 0.25f, bounds.getY() + bounds.getHeight() * 0.20f,
-            m_comp_bg.darker(0.15f),
-            bounds.getRight() - bounds.getWidth() * 0.15f, bounds.getBottom() - bounds.getHeight() * 0.10f,
-            true
-        );
-
-        g.setGradientFill(faceGrad);
+        // juce::ColourGradient faceGrad(
+        //     gui_utils::Colors::medium_bg().brighter(0.05f),
+        //     bounds.getX() + bounds.getWidth() * 0.25f, bounds.getY() + bounds.getHeight() * 0.20f,
+        //     gui_utils::Colors::medium_bg().darker(0.05f),
+        //     bounds.getRight() - bounds.getWidth() * 0.15f, bounds.getBottom() - bounds.getHeight() * 0.10f,
+        //     true
+        // );
+        //
+        // g.setGradientFill(faceGrad);
+        g.setColour(juce::Colour(44, 49, 60));
         g.fillRect(bounds);
-
-        g.setOpacity(0.1f);
-        g.drawImageWithin(Images::texture(), 0, 0, getWidth(), getHeight(), juce::RectanglePlacement::stretchToFit);
-        g.setOpacity(1.0f);
 
         constexpr auto padding = 1;
 
-        g.setColour(gui_utils::Colors::medium_bg());
+        //g.setColour(gui_utils::Colors::header_bg());
         g.fillRect(padding, 0, getWidth() - padding, juce::roundToInt(getHeight() * 0.05) + 12);
         g.fillRect(padding, juce::roundToInt(getHeight() * 0.91), getWidth() - padding, juce::roundToInt(getHeight() * 0.09));
 
-        g.setColour(juce::Colour(0, 0, 0));
+        g.setColour(gui_utils::Colors::light_bg());
         g.drawRect(0, 0, getWidth(), getHeight(), padding);
 
-        g.setColour(gui_utils::Colors::bright_bg());
         auto y = static_cast<float>(getHeight()) * 0.05f + 12.0f;
         g.drawLine(padding, y, static_cast<float>(getWidth()) - padding, y, padding);
 
@@ -152,7 +148,7 @@ namespace viator::gui::editors
     {
         slider.setSliderStyle(juce::Slider::RotaryVerticalDrag);
         slider.setColour(juce::Slider::ColourIds::thumbColourId, juce::Colours::transparentBlack);
-        slider.setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, juce::Colours::dimgrey);
+        slider.setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, gui_utils::Colors::dial_bg());
         slider.setColour(juce::Slider::ColourIds::rotarySliderFillColourId, juce::Colours::whitesmoke);
         slider.setLookAndFeel(&m_io_laf);
         addAndMakeVisible(slider);
@@ -163,7 +159,7 @@ namespace viator::gui::editors
         box.addItemList(items, 1);
         box.setLookAndFeel(&m_menu_laf);
         box.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
-        box.setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::whitesmoke.withAlpha(0.05f));
+        box.setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::whitesmoke.withAlpha(0.0f));
         box.getLookAndFeel().setColour(juce::PopupMenu::ColourIds::backgroundColourId, gui_utils::Colors::light_bg());
         addAndMakeVisible(box);
         box.setSelectedId(1);
@@ -174,8 +170,10 @@ namespace viator::gui::editors
         button.setButtonText(name);
         button.setColour(juce::ComboBox::ColourIds::outlineColourId,
                          juce::Colours::transparentBlack);
-        button.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::whitesmoke.withAlpha(0.05f));
-        button.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::whitesmoke.withAlpha(0.15f));
+        button.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::transparentBlack);
+        button.setColour(juce::TextButton::ColourIds::buttonOnColourId, gui_utils::Colors::widget_on());
+        button.setColour(juce::TextButton::ColourIds::textColourOffId, gui_utils::Colors::text());
+        button.setColour(juce::TextButton::ColourIds::textColourOnId, gui_utils::Colors::text());
         button.setLookAndFeel(&m_button_laf);
         addAndMakeVisible(button);
     }

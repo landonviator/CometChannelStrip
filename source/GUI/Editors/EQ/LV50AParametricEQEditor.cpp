@@ -109,7 +109,6 @@ namespace viator::gui::editors
     //==============================================================================
     void LV50AParametricEQEditor::paint(juce::Graphics &g)
     {
-        setBackgroundColor(juce::Colour(14, 15, 16));
         BaseEditor::paint(g);
     }
 

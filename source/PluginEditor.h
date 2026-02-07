@@ -36,10 +36,8 @@ private:
     std::vector<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>> m_macro_attaches;
 
     void initMacroKnobs();
-    viator::gui::laf::MacroLAF m_macro_laf {2};
-    //juce::Label m_macro_bg;
-    RoundedBackdrop m_macro_bg;
-    viator::gui::laf::Billboard m_billboard_laf;
+    viator::laf::MacroLAF m_macro_laf {2};
+    //RoundedBackdrop m_macro_bg;
 
     void changeListenerCallback(juce::ChangeBroadcaster *source) override;
 

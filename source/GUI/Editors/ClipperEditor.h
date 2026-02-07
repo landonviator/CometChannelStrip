@@ -32,7 +32,7 @@ namespace viator::gui::editors
         std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> m_clipper_type_attach;
         void setComboBoxProps(juce::ComboBox& box, const juce::StringArray& items);
 
-        viator::gui::laf::DialLAF m_dial_laf;
+        viator::laf::DialLAF m_dial_laf;
         viator::gui::laf::MenuLAF m_menu_laf;
     };
 }

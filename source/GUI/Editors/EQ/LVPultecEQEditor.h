@@ -10,9 +10,9 @@
 
 namespace viator::gui::editors
 {
-    class LVPultecEQEditor : public viator::gui::editors::BaseEditor {
+    class LVPultecEQEditor : public BaseEditor {
     public:
-        explicit LVPultecEQEditor(viator::dsp::processors::LVPultecEQProcessor &);
+        explicit LVPultecEQEditor(dsp::processors::LVPultecEQProcessor &);
 
         ~LVPultecEQEditor() override;
 
@@ -29,11 +29,11 @@ namespace viator::gui::editors
         };
 
     private:
-        viator::dsp::processors::LVPultecEQProcessor &processorRef;
+        dsp::processors::LVPultecEQProcessor &processorRef;
 
         void setComboBoxProps(juce::ComboBox &box, const juce::StringArray &items);
 
-        std::array<viator::gui::widgets::BaseSlider, num_sliders> m_main_sliders;
+        std::array<widgets::BaseSlider, num_sliders> m_main_sliders;
         std::array<juce::Label, num_sliders> m_main_labels;
         std::vector<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> > main_slider_attaches;
 
@@ -43,7 +43,7 @@ namespace viator::gui::editors
 
         void updateLabels();
 
-        viator::gui::laf::DialLAF m_dial_laf;
+        viator::laf::DialLAF m_dial_laf;
         viator::gui::laf::MenuLAF m_menu_laf;
     };
 }

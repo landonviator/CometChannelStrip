@@ -29,7 +29,7 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
     m_rack.addActionListener(this);
     m_rack.rebuild_editors();
 
-    addAndMakeVisible(m_macro_bg);
+    //addAndMakeVisible(m_macro_bg);
 
     initMacroKnobs();
 
@@ -55,16 +55,33 @@ AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
 
     m_rack.removeActionListener(this);
 
-    m_macro_bg.setLookAndFeel(nullptr);
+    //m_macro_bg.setLookAndFeel(nullptr);
 }
 
 //==============================================================================
 void AudioPluginAudioProcessorEditor::paint(juce::Graphics &g)
 {
-    g.fillAll(viator::gui_utils::Colors::darkest_bg());
+    const auto bounds = getLocalBounds();
 
-    g.setColour(juce::Colours::black);
-    g.drawRect(0, 0, getWidth(), getHeight(), 3);
+    juce::ColourGradient faceGrad(
+        viator::gui_utils::Colors::main_bg().brighter(0.05f),
+        bounds.getX() + bounds.getWidth() * 0.25f, bounds.getY() + bounds.getHeight() * 0.20f,
+        viator::gui_utils::Colors::main_bg().darker(0.05f),
+        bounds.getRight() - bounds.getWidth() * 0.15f, bounds.getBottom() - bounds.getHeight() * 0.10f,
+        true
+    );
+
+    g.setGradientFill(faceGrad);
+    g.fillRect(bounds);
+
+    // header
+    auto line = static_cast<float>(getHeight()) * 0.08f;
+    g.setColour(viator::gui_utils::Colors::light_bg());
+    g.drawLine(0, line, static_cast<float>(getWidth()), line, 2.0f);
+
+    // footer
+    line = static_cast<float>(getHeight()) * 0.94f;
+    g.drawLine(0, line, static_cast<float>(getWidth()), line, 2.0f);
 }
 
 void AudioPluginAudioProcessorEditor::resized()
@@ -93,16 +110,9 @@ void AudioPluginAudioProcessorEditor::resized()
 
     m_view_port.setBounds(rackX, rackY, rackWidth, rackHeight);
 
-    // MACRO DIALS
-    const auto macroX = juce::roundToInt(getWidth() * 0.08);
-    const auto macroY = juce::roundToInt(getHeight() * 0.86);
-    const auto macroWidth = juce::roundToInt(getWidth() * 0.84);
-    const auto macroHeight = juce::roundToInt(getHeight() * 0.135);
-    m_macro_bg.setBounds(macroX, macroY, macroWidth, macroHeight);
-
     // Macro Dials
     auto compX = juce::roundToInt(getWidth() * 0.1);
-    const auto compY = juce::roundToInt(getHeight() * 0.875);
+    const auto compY = juce::roundToInt(getHeight() * 0.84);
     const auto compWidth = juce::roundToInt(getWidth() * 0.05);
     const auto compHeight = juce::roundToInt(compWidth * 1.089);
     padding = juce::roundToInt(getWidth() * 0.033);
@@ -131,7 +141,7 @@ void AudioPluginAudioProcessorEditor::initMacroKnobs()
         m_macro_knobs[i].addMouseListener(this, true);
         m_macro_knobs[i].setColour(juce::Slider::ColourIds::thumbColourId, juce::Colours::transparentWhite);
         m_macro_knobs[i].setColour(juce::Slider::ColourIds::rotarySliderFillColourId, juce::Colour(234, 234, 234));
-        m_macro_knobs[i].setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, juce::Colour(73, 73, 73));
+        m_macro_knobs[i].setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, viator::gui_utils::Colors::dial_bg());
         m_macro_knobs[i].setLookAndFeel(&m_macro_laf);
         m_macro_attaches.emplace_back(
                 std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processorRef
