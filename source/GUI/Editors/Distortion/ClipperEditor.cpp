@@ -2,7 +2,7 @@
 // Created by Landon Viator on 11/14/25.
 //
 
-#include "ClipperEditor.h"
+#include "../Distortion/ClipperEditor.h"
 
 namespace viator::gui::editors
 {

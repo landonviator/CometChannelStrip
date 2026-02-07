@@ -125,7 +125,7 @@ namespace viator::gui::editors
         m_io_sliders[kOutput].setBounds(x, y, width, height);
         m_io_sliders[kOutput].setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
 
-        constexpr auto padding = 2;
+        constexpr auto padding = 1;
 
         // MENUS
         x = 4;
@@ -171,7 +171,7 @@ namespace viator::gui::editors
         button.setColour(juce::ComboBox::ColourIds::outlineColourId,
                          juce::Colours::transparentBlack);
         button.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::transparentBlack);
-        button.setColour(juce::TextButton::ColourIds::buttonOnColourId, gui_utils::Colors::widget_on());
+        button.setColour(juce::TextButton::ColourIds::buttonOnColourId, gui_utils::Colors::light_bg().withAlpha(0.5f));
         button.setColour(juce::TextButton::ColourIds::textColourOffId, gui_utils::Colors::text());
         button.setColour(juce::TextButton::ColourIds::textColourOnId, gui_utils::Colors::text());
         button.setLookAndFeel(&m_button_laf);

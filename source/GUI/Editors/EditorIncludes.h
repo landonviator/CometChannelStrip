@@ -5,9 +5,7 @@
 #pragma once
 
 #include "BaseEditor.h"
-#include "ClipperEditor.h"
-#include "50AEditor.h"
-#include "TestEditor.h"
+#include "Distortion/ClipperEditor.h"
 #include "EQ/LV60GraphicEQEditor.h"
 #include "EQ/LV50AParametricEQEditor.h"
 #include "EQ/LVPultecEQEditor.h"

@@ -77,11 +77,13 @@ void AudioPluginAudioProcessorEditor::paint(juce::Graphics &g)
     // header
     auto line = static_cast<float>(getHeight()) * 0.08f;
     g.setColour(viator::gui_utils::Colors::light_bg());
-    g.drawLine(0, line, static_cast<float>(getWidth()), line, 2.0f);
+    g.drawLine(0, line, static_cast<float>(getWidth()), line, 1.0f);
 
     // footer
     line = static_cast<float>(getHeight()) * 0.94f;
-    g.drawLine(0, line, static_cast<float>(getWidth()), line, 2.0f);
+    g.drawLine(0, line, static_cast<float>(getWidth()), line, 1.0f);
+
+    g.drawRect(bounds);
 }
 
 void AudioPluginAudioProcessorEditor::resized()

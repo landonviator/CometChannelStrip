@@ -1,5 +1,5 @@
 #include "ClipperProcessor.h"
-#include "../../../GUI/Editors/ClipperEditor.h"
+#include "../../../GUI/Editors/Distortion/ClipperEditor.h"
 
 namespace viator::dsp::processors
 {

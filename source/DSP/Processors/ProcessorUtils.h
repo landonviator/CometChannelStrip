@@ -12,8 +12,6 @@ namespace viator::dsp::processors
     enum class ProcessorType
     {
         kClipper,
-        k50A,
-        kTest,
         kLV60GraphicEQ,
         kLV50AParametricEQ,
         kLVPultecEQ
@@ -34,7 +32,7 @@ namespace viator::dsp::processors
                 {
                         ProcessorType::kClipper,
                         "Clipper",
-                        "Test",
+                        "Distortion",
                         [](int id)
                         {
                             return std::make_unique<viator::dsp::processors::ClipperProcessor>(id);
@@ -43,34 +41,6 @@ namespace viator::dsp::processors
                         {
                             auto& type = dynamic_cast<viator::dsp::processors::ClipperProcessor&>(processor);
                             return std::make_unique<viator::gui::editors::ClipperEditor>(type);
-                        }
-                },
-                {
-                        ProcessorType::k50A,
-                        "50A",
-                        "Test",
-                        [](int id)
-                        {
-                            return std::make_unique<viator::dsp::processors::AmplificationProcessor>(id);
-                        },
-                        [](juce::AudioProcessor& processor)
-                        {
-                            auto& typed = dynamic_cast<viator::dsp::processors::AmplificationProcessor&>(processor);
-                            return std::make_unique<viator::gui::editors::AmplificationEditor>(typed);
-                        }
-                },
-                {
-                        ProcessorType::kTest,
-                        "Test",
-                        "Test",
-                        [](int id)
-                        {
-                            return std::make_unique<viator::dsp::processors::TestProcessor>(id);
-                        },
-                        [](juce::AudioProcessor& processor)
-                        {
-                            auto& typed = dynamic_cast<viator::dsp::processors::TestProcessor&>(processor);
-                            return std::make_unique<viator::gui::editors::TestEditor>(typed);
                         }
                 },
                 {
@@ -165,9 +135,10 @@ namespace viator::dsp::processors
         }
 
         DBG("!! No match found. Falling back or asserting.");
+
         // fallback
-        if (auto *bc = dynamic_cast<viator::dsp::processors::TestProcessor *>(processor))
-            return std::make_unique<viator::gui::editors::TestEditor>(*bc);
+        if (auto *bc = dynamic_cast<viator::dsp::processors::ClipperProcessor *>(processor))
+            return std::make_unique<viator::gui::editors::ClipperEditor>(*bc);
 
         jassertfalse;
         return nullptr;

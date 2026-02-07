@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "../../DSP/Processors/Clipper/ClipperProcessor.h"
-#include "BaseEditor.h"
-#include "../Widgets/BaseSlider.h"
+#include "../../../DSP/Processors/Clipper/ClipperProcessor.h"
+#include "../BaseEditor.h"
+#include "../../Widgets/BaseSlider.h"
 
 namespace viator::gui::editors
 {

@@ -18,7 +18,7 @@ namespace viator::gui_utils
         static juce::Colour meter_red()      { return {247, 55, 79}; }
 
         static juce::Colour main_bg()      { return {36, 39, 46}; }
-        static juce::Colour light_bg()      { return {75, 77, 79}; }
+        static juce::Colour light_bg()      { return {142, 149, 162}; }
         static juce::Colour widget_on()      { return {75, 77, 79}; }
         static juce::Colour dial_bg()      { return {144, 144, 147}; }
     };
