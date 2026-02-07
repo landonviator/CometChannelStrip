@@ -44,6 +44,7 @@ namespace viator::gui::editors
         void updateLabels();
 
         viator::laf::DialLAF m_dial_laf;
+        viator::laf::PultecHandleDialLAF m_rect_dial_laf;
         viator::gui::laf::MenuLAF m_menu_laf;
     };
 }

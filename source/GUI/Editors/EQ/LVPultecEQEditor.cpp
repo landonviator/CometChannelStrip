@@ -35,6 +35,27 @@ namespace viator::gui::editors
                 std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processorRef.getTreeState(), ids[i] + id, m_main_sliders[i]));
         }
 
+        m_main_sliders[kLowBoost].setTextValueSuffix(" dB");
+        m_main_sliders[kHighBoost].setTextValueSuffix(" dB");
+        m_main_sliders[kLowAtten].setTextValueSuffix(" dB");
+        m_main_sliders[kHighAtten].setTextValueSuffix(" dB");
+        m_main_sliders[kLowFreq].setTextValueSuffix(" Hz");
+        m_main_sliders[kHighFreq].setTextValueSuffix(" Hz");
+        m_main_sliders[kHighAttenSel].setTextValueSuffix(" Hz");
+        m_main_sliders[kBandwidth].setTextValueSuffix(" Q");
+
+        m_main_sliders[kLowFreq].setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, gui_utils::Colors::dial_bg());
+        m_main_sliders[kHighFreq].setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, gui_utils::Colors::dial_bg());
+        m_main_sliders[kHighAttenSel].setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, gui_utils::Colors::dial_bg());
+
+        m_main_sliders[kLowFreq].setColour(juce::Slider::ColourIds::backgroundColourId, gui_utils::Colors::main_bg());
+        m_main_sliders[kHighFreq].setColour(juce::Slider::ColourIds::backgroundColourId, gui_utils::Colors::main_bg());
+        m_main_sliders[kHighAttenSel].setColour(juce::Slider::ColourIds::backgroundColourId, gui_utils::Colors::main_bg());
+
+        m_main_sliders[kLowFreq].setLookAndFeel(&m_rect_dial_laf);
+        m_main_sliders[kHighFreq].setLookAndFeel(&m_rect_dial_laf);
+        m_main_sliders[kHighAttenSel].setLookAndFeel(&m_rect_dial_laf);
+
         for (auto &label: m_main_labels)
         {
             setLabelProps(label);
