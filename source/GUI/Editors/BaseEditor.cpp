@@ -62,11 +62,28 @@ namespace viator::gui::editors
                                  processorRef.getProcessorID()),
             m_buttons[kMute]);
 
+        for (auto& meter : m_input_meters)
+        {
+            addAndMakeVisible(meter);
+        }
+
+        for (auto& meter : m_output_meters)
+        {
+            addAndMakeVisible(meter);
+        }
+
+        m_output_meters[0].setFillDirection(LevelMeter::FillDirection::RightToLeft);
+        m_output_meters[1].setFillDirection(LevelMeter::FillDirection::RightToLeft);
+
+        startTimerHz(30);
+
         setSize(1000, 600);
     }
 
     BaseEditor::~BaseEditor()
     {
+        stopTimer();
+
         m_io_sliders[kInput].setLookAndFeel(nullptr);
         m_io_sliders[kOutput].setLookAndFeel(nullptr);
         m_preset_browser.setLookAndFeel(nullptr);
@@ -127,6 +144,17 @@ namespace viator::gui::editors
 
         constexpr auto padding = 1;
 
+        x = juce::roundToInt(getWidth() * 0.16);
+        y = juce::roundToInt(getHeight() * 0.942);
+        width = juce::roundToInt(getWidth() * 0.26);
+        height = juce::roundToInt(getHeight() * 0.018);
+        m_input_meters[0].setBounds(x, y, width, height);
+        y += height + 2;
+        m_input_meters[1].setBounds(x, y, width, height);
+        x += width + x;
+        m_output_meters[0].setBounds(x, m_input_meters[0].getY(), width, height);
+        m_output_meters[1].setBounds(x, m_input_meters[1].getY(), width, height);
+
         // MENUS
         x = 4;
         width = juce::roundToInt(getWidth() * 0.335);
@@ -176,5 +204,16 @@ namespace viator::gui::editors
         button.setColour(juce::TextButton::ColourIds::textColourOnId, gui_utils::Colors::text());
         button.setLookAndFeel(&m_button_laf);
         addAndMakeVisible(button);
+    }
+
+    void BaseEditor::timerCallback()
+    {
+        const auto in = processorRef.getInputLevelsStereo();
+        const auto out = processorRef.getOutputLevelsStereo();
+
+        m_input_meters[0].setLevel(in.first);
+        m_input_meters[1].setLevel(in.second);
+        m_output_meters[0].setLevel(out.first);
+        m_output_meters[1].setLevel(out.second);
     }
 }

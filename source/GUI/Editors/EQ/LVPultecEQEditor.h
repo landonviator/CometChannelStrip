@@ -34,14 +34,14 @@ namespace viator::gui::editors
         void setComboBoxProps(juce::ComboBox &box, const juce::StringArray &items);
 
         std::array<widgets::BaseSlider, num_sliders> m_main_sliders;
-        std::array<juce::Label, num_sliders> m_main_labels;
         std::vector<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> > main_slider_attaches;
 
         void setSliderProps(juce::Slider &slider);
 
         void setLabelProps(juce::Label &label);
 
-        void updateLabels();
+        juce::TextButton m_tube_button;
+        viator::laf::ButtonLAF m_button_laf;
 
         viator::laf::DialLAF m_dial_laf;
         viator::laf::PultecHandleDialLAF m_rect_dial_laf;

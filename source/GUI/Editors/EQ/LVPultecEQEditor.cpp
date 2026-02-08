@@ -26,7 +26,7 @@ namespace viator::gui::editors
 
         for (int i = 0; i < num_sliders; ++i)
         {
-            setSliderProps(m_main_sliders[i]);
+            LVPultecEQEditor::setSliderProps(m_main_sliders[i]);
             getSliders().push_back(&m_main_sliders[i]);
             m_main_sliders[i].setComponentID(ids[i]);
             m_main_sliders[i].setName(names[i]);
@@ -55,13 +55,6 @@ namespace viator::gui::editors
         m_main_sliders[kLowFreq].setLookAndFeel(&m_rect_dial_laf);
         m_main_sliders[kHighFreq].setLookAndFeel(&m_rect_dial_laf);
         m_main_sliders[kHighAttenSel].setLookAndFeel(&m_rect_dial_laf);
-
-        for (auto &label: m_main_labels)
-        {
-            setLabelProps(label);
-        }
-
-        updateLabels();
 
         setSize(1000, 600);
     }
@@ -133,16 +126,5 @@ namespace viator::gui::editors
         box.getLookAndFeel().setColour(juce::PopupMenu::ColourIds::backgroundColourId,
                                        viator::gui_utils::Colors::editor_minor_bg_color());
         addAndMakeVisible(box);
-    }
-
-    void LVPultecEQEditor::updateLabels()
-    {
-        for (int i = 0; i < m_main_sliders.size(); ++i)
-        {
-            const auto value = m_main_sliders[i].getValue();
-            const auto text_value = value >= 1000.0 ? juce::String(value / 1000.0f, 2) + " kHz" : juce::String(value, 2);
-            const auto text = m_main_sliders[i].isMouseOverOrDragging() ? text_value : m_main_sliders[i].getName();
-            m_main_labels[i].setText(text, juce::dontSendNotification);
-        }
     }
 }

@@ -13,10 +13,11 @@
 #include "../Style/Colors.h"
 #include "../../Globals/Globals.h"
 #include "../Style/Images.h"
+#include "../Widgets/LevelMeter.h"
 
 namespace viator::gui::editors
 {
-    class BaseEditor : public juce::AudioProcessorEditor, public juce::ActionBroadcaster {
+    class BaseEditor : public juce::AudioProcessorEditor, public juce::ActionBroadcaster, public juce::Timer {
     public:
         explicit BaseEditor(dsp::processors::BaseProcessor &);
 
@@ -34,7 +35,8 @@ namespace viator::gui::editors
 
         enum SliderType {
             kInput = 0,
-            kOutput
+            kOutput,
+            kNumSliders
         };
 
         enum ButtonType {
@@ -64,13 +66,15 @@ namespace viator::gui::editors
         std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> m_mute_attach;
         void setButtonProps(juce::TextButton &button, const juce::String &name);
 
-        void drawHeaderAndFooter(juce::Graphics &g);
-
         juce::Colour m_comp_bg = gui_utils::Colors::light_bg();
         juce::Colour m_widget_bg = juce::Colours::black.withAlpha(0.3f);
 
         std::unique_ptr<juce::DropShadower> m_drop_shadow;
 
         viator::laf::ButtonLAF m_button_laf;
+
+        std::array<LevelMeter, kNumSliders> m_input_meters, m_output_meters;
+
+        void timerCallback() override;
     };
 }

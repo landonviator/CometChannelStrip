@@ -38,11 +38,74 @@ class BaseProcessor : public juce::AudioProcessor
         }
     }
 
+    std::pair<float, float> getInputLevelsStereo() const
+    {
+        return { input_levels[0].getCurrentValue(), input_levels[1].getCurrentValue() };
+    }
+
+    std::pair<float, float> getOutputLevelsStereo() const
+    {
+        return { output_levels[0].getCurrentValue(), output_levels[1].getCurrentValue() };
+    }
+
+    void calculateInputPeakLevel(const juce::AudioBuffer<float> &buffer)
+    {
+        const int numInputChannels = getTotalNumInputChannels();
+        const int numSamples = buffer.getNumSamples();
+
+        for (int ch = 0; ch < numInputChannels; ++ch)
+        {
+            input_levels[ch].skip(numSamples);
+            input_peaks[ch] = buffer.getMagnitude(ch, 0, numSamples);
+
+            if (input_peaks[ch] < input_levels[ch].getCurrentValue())
+                input_levels[ch].setTargetValue(input_peaks[ch]);
+            else
+                input_levels[ch].setCurrentAndTargetValue(input_peaks[ch]);
+        }
+
+        for (int ch = numInputChannels; ch < 2; ++ch)
+        {
+            input_levels[ch].skip(numSamples);
+            input_peaks[ch] = 0.0f;
+            input_levels[ch].setTargetValue(0.0f);
+        }
+    }
+
+    void calculateOutputPeakLevel(const juce::AudioBuffer<float> &buffer)
+    {
+        const int numInputChannels = getTotalNumInputChannels();
+        const int numSamples = buffer.getNumSamples();
+
+        for (int ch = 0; ch < numInputChannels; ++ch)
+        {
+            output_levels[ch].skip(numSamples);
+            output_peaks[ch] = buffer.getMagnitude(ch, 0, numSamples);
+
+            if (output_peaks[ch] < output_levels[ch].getCurrentValue())
+                output_levels[ch].setTargetValue(output_peaks[ch]);
+            else
+                output_levels[ch].setCurrentAndTargetValue(output_peaks[ch]);
+        }
+
+        for (int ch = numInputChannels; ch < 2; ++ch)
+        {
+            output_levels[ch].skip(numSamples);
+            output_peaks[ch] = 0.0f;
+            output_levels[ch].setTargetValue(0.0f);
+        }
+    }
+
 private:
 
     std::unique_ptr<juce::AudioProcessorValueTreeState> m_tree_state;
 
     int m_processor_id { -1 };
+
+    std::array<juce::SmoothedValue<float>, 2> input_levels;
+    std::array<float, 2> input_peaks;
+    std::array<juce::SmoothedValue<float>, 2> output_levels;
+    std::array<float, 2> output_peaks;
 
     //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BaseProcessor)

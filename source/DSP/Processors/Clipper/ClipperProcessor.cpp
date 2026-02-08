@@ -201,6 +201,8 @@ namespace viator::dsp::processors
             m_dry_buffer.copyFrom(channel, 0, buffer, channel, 0, buffer.getNumSamples());
         }
 
+        calculateInputPeakLevel(buffer);
+
         const auto oversampling_choice = m_parameters->oversamplingParam->getIndex();
         if (oversampling_choice >= 0 && static_cast<size_t>(oversampling_choice) < m_process_blocks.size())
         {
@@ -221,6 +223,8 @@ namespace viator::dsp::processors
                 data[sample] = (1.0f - mix) * dry_sample + wet_sample * mix;
             }
         }
+
+        calculateOutputPeakLevel(buffer);
     }
 
     //==============================================================================
