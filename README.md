@@ -34,7 +34,7 @@ Linux. Installing CLion should also install CMake, but it would be a good idea t
 Release Build Commands:
 
 ```
-cmake -B Build -D CMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64
+cmake -B Build -D CMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
 cmake --build Build --config Release
 ```
 
